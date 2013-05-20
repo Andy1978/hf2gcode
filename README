@@ -4,6 +4,8 @@
 The work to this has begun in 17. May 2013, so there isn't anything useful here yet.
 --17.05.2013 Andreas Weber
 
+I think rowmans.jhf would be a nice, simple and fast font for the needler project.
+
 === Design ===
 
 There will be a libhf2gcode-dev, a static linkable version which does the actual type setting
