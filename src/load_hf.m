@@ -22,6 +22,8 @@ function ret = load_hf (fn)
 
     endwhile
   fclose (fid);
+  else
+    error("file %s not found",fn)
   endif
 endfunction
 
