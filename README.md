@@ -23,9 +23,9 @@ Dependencies
 Unsorted Links
 --------------
 
-http://en.wikipedia.org/wiki/Hershey_font
-http://www.ghostscript.com/doc/current/Hershey.htm
-http://emergent.unpythonic.net/software/hershey (Download of the fonts and description)
-http://www.timeguy.com/cradek/truetype (A TrueType tracer with DXF and G-Code output)
-http://wiki.linuxcnc.org/cgi-bin/wiki.pl?Simple_LinuxCNC_G-Code_Generators#Text_Engraving_Software
-http://www.evilmadscientist.com/2011/hershey-text-an-inkscape-extension-for-engraving-fonts/ (Inkscape extension)
+*  http://en.wikipedia.org/wiki/Hershey_font
+*  http://www.ghostscript.com/doc/current/Hershey.htm
+*  http://emergent.unpythonic.net/software/hershey (Download of the fonts and description)
+*  http://www.timeguy.com/cradek/truetype (A TrueType tracer with DXF and G-Code output)
+*  http://wiki.linuxcnc.org/cgi-bin/wiki.pl?Simple_LinuxCNC_G-Code_Generators#Text_Engraving_Software
+*  http://www.evilmadscientist.com/2011/hershey-text-an-inkscape-extension-for-engraving-fonts/ (Inkscape extension)
