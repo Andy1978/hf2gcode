@@ -38,26 +38,15 @@ all_hf={"astrology.jhf",
         "timesrb.jhf",
         "timesr.jhf"};
 
-%~ for (k=1:length(all_hf))
-  %~ fn=strcat("../hershey_fonts/fixed/",all_hf{k});
-  %~ printf("Using %s...\n",fn);
-  %~ fflush(stdout);
-  %~ #render_hf(fn,outdir);
-%~ endfor
+for k=1:length(all_hf)
+  fn=strcat("../hershey_fonts/fixed/",all_hf{k});
+  hf = load_hf (fn);
 
-fn=strcat("../hershey_fonts/fixed/",all_hf{23})
-hf = load_hf (fn);
-
-#wie hängt rightmargin mit der maximalen Ausdehnung zusammen?
-for k=1:length(hf)
-  i = find (hf(k).x==-50);
-  #hf(k).x(i)=[];
-  #hf(k).y(i)=[];
-  
-  printf("%d %d %d %d\n",\
-    min(hf(k).x),\
-    hf(k).leftmargin,\
-    max(hf(k).x),\
-    hf(k).rightmargin);
-
+  ## show min && max in x and y
+  tmp_x = [hf.x];
+  tmp_y = [hf.y];
+  ind = tmp_x == -50;
+  tmp_x(ind) = [];
+  tmp_y(ind) = [];
+  disp([min(tmp_x) max(tmp_x) min(tmp_y) max(tmp_y)])
 endfor

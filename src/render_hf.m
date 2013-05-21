@@ -11,6 +11,7 @@ function render_hf (fn, outdir="./")
   fflush(stdout);
 
   hf = load_hf (fn);
+  figure("visible","off");
   plot_hf(hf), axis square
 
   if(!exist(outdir,"dir"))

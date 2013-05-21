@@ -5,7 +5,7 @@ function plot_hf(hf,cols=10, xsep=30, ysep=50)
   for (i=1:length(hf))
     col = mod (i-1,cols);
     row = floor ((i-1)/cols);
-    plot_hf_glyph(hf(i), xsep*col, ysep*row)
+    plot_hf_glyph(hf(i), xsep*col, ysep*row, 1)
     hold on
   endfor
   hold off
