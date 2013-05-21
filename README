@@ -1,24 +1,27 @@
-
-*** hf2gcode, a hershey font to g-code tracer ***
+hf2gcode, a hershey font to g-code tracer
+=========================================
 
 The work to this has begun in 17. May 2013, so there isn't anything useful here yet.
---17.05.2013 Andreas Weber
 
 I think rowmans.jhf would be a nice, simple and fast font for the needler project.
 
-=== Design ===
+Design
+------
 
 There will be a libhf2gcode-dev, a static linkable version which does the actual type setting
 and tracing and a CLI programm to call it. Furthermore the libhf2gcode-dev should be compilable
 with avr-gcc and run on an AVR Atmega32.
 
-=== Brainstorming ===
+Brainstorming
+-------------
 
 http://www.gnu.org/software/libc/manual/html_node/Parsing-Program-Arguments.html
 
-=== Dependencies ===
+Dependencies
+------------
 
-=== Unsorted Links ===
+Unsorted Links
+--------------
 
 http://en.wikipedia.org/wiki/Hershey_font
 http://www.ghostscript.com/doc/current/Hershey.htm
