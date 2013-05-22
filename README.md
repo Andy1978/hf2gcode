@@ -1,6 +1,8 @@
 hf2gcode, a hershey font to g-code tracer
 =========================================
 
+![Part of the astrology font](http://tech-chat.de/png_album/atrology_part.png)
+
 The work to this has begun in 17. May 2013. Until now there is
 *  Some octave scripts to load, plot and render (see http://www.tech-chat.de/png_album/) hershey fonts
 *  An octave script to generate C variable definitions
