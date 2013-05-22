@@ -1,9 +1,9 @@
 hf2gcode, a hershey font to g-code tracer
 =========================================
 
-The work to this has begun in 17. May 2013, so there isn't anything useful here yet.
-
-I think rowmans.jhf would be a nice, simple and fast font for the needler project.
+The work to this has begun in 17. May 2013. Until now there is
+*  Some octave scripts to load, plot and render (see http://www.tech-chat.de/png_album/) hershey fonts
+*  An octave script to generate C variable definitions
 
 Design
 ------
@@ -14,11 +14,15 @@ with avr-gcc and run on an AVR Atmega32.
 
 Brainstorming
 -------------
+I think rowmans.jhf would be a nice, simple and fast font for the needler project.
 
 http://www.gnu.org/software/libc/manual/html_node/Parsing-Program-Arguments.html
 
 Dependencies
 ------------
+*  GNU Octave if you want to generate the hershey font overview pngs and svgs or
+to generated the hershey_font C construction.
+*  photon if you want to generate a static HTML page with rendered fonts like http://www.tech-chat.de/png_album/
 
 Unsorted Links
 --------------
