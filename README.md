@@ -1,6 +1,5 @@
 hf2gcode, a hershey font to g-code tracer
 =========================================
-
 ![Part of the astrology font](http://tech-chat.de/png_album/atrology_part.png)
 
 The work to this has begun in 17. May 2013. Until now there is
@@ -9,7 +8,6 @@ The work to this has begun in 17. May 2013. Until now there is
 
 Design
 ------
-
 There will be a libhf2gcode-dev, a static linkable version which does the actual type setting
 and tracing and a CLI programm to call it. Furthermore the libhf2gcode-dev should be compilable
 with avr-gcc and run on an AVR Atmega32.
