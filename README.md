@@ -20,6 +20,10 @@ I think rowmans.jhf would be a nice, simple and fast font for the needler projec
 
 http://www.gnu.org/software/libc/manual/html_node/Parsing-Program-Arguments.html
 
+License
+-------
+GPLv3, see file LICENSE
+
 Dependencies
 ------------
 *  GNU Octave if you want to generate the hershey font overview pngs and svgs or
