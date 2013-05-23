@@ -18,6 +18,9 @@ I think rowmans.jhf would be a nice, simple and fast font for the needler projec
 
 http://www.gnu.org/software/libc/manual/html_node/Parsing-Program-Arguments.html
 
+Testing with LinuxCNC as simulator
+http://wiki.linuxcnc.org/cgi-bin/wiki.pl?Build_A_Simulator_Manually
+
 License
 -------
 GPLv3, see file LICENSE

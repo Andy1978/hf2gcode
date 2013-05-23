@@ -10,21 +10,18 @@ function gen_C_code(fn, fn_out)
   [DIR, NAME, EXT, VER] = fileparts (fn);
 
   hf = load_hf (fn);
-  ## translation table ASCII -> hershey_font entry for rowmans
-  ## ToDo: this has to be updated for other, special fontsets
-  tt=zeros(256,1);
-  tt(32:126)=1:95;
-
   [fid, MSG] = fopen(fn_out,"w");
   if (fid != -1)
-    fprintf(fid, "char %s[]=",NAME); 
-    for i=32:126
-      glyph=hf(tt(i));
+    fprintf(fid, "/* number of glyphs in font */\nunsigned char %s_cnt = %d;\n", NAME, length(hf));
+    fprintf(fid, "/* Format: margin left, margin right, X, Y ... \\0\n< R> is pen-up, see original hershey font */\n");
+    fprintf(fid, "char %s []=",NAME);
+    for i=1:length(hf);
+      glyph=hf(i);
       l=length(glyph.x);
       s=char([glyph.leftmargin glyph.x;glyph.rightmargin glyph.y](:)'+'R');
       ## escape some chars
       s = strrep(s, "\\", "\\\\");
-      if(i>32)
+      if(i>1)
         fprintf(fid, "          ");
       endif
       fprintf(fid,"\"%s\\0\"\\\n",s)
