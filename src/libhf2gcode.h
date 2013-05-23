@@ -6,9 +6,9 @@
 char * get_glyph_ptr (const char *font,
                       const unsigned char c);
                       
-void g_header(FILE *f);
+void g_header(FILE *f, char verbose);
              
-void g_footer(FILE *f);
+void g_footer(FILE *f, char verbose);
 
 int g_body ( FILE *f,\
              char verbose,\

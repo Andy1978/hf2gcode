@@ -29,6 +29,16 @@ const char *argp_program_version = "hf2gcode 0.1";
   Am Besten konfigurierbar über Args, über Z-Achse default
 */
 
+/* ToDo:
+ * %f precision of generated g-code? %f6.3 per argument?
+ * optimize output, check if X or Y command is the same, then drop that
+ *
+ *
+ *
+ *
+ *
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include "libhf2gcode.h"
@@ -75,24 +85,24 @@ char * get_glyph_ptr (const char *font,
 }
 
 /* generate g-code header */
-void g_header(FILE *f)
+void g_header(FILE *f, char verbose)
 {
   fprintf (f, "( generated with %s )\n",argp_program_version);
-  fprintf (f, "G21 ( units in mm )\n");
-  fprintf (f, "G90 ( absolute distance mode )\n");
-  fprintf (f, "G64 ( best possible speed )\n");
-  fprintf (f, "G40 ( turn off tool diameter compensation )\n");
-  fprintf (f, "G49 ( turns off tool length compensation )\n");
-  fprintf (f, "G94 ( Feed Rate Mode: Units per Minute Mode )\n");
-  fprintf (f, "G17 ( X-Y plane )\n");
+  fprintf (f, "G21%s\n",verbose? " ( units in mm )":"");
+  fprintf (f, "G90%s\n",verbose? " ( absolute distance mode )":"");
+  fprintf (f, "G64%s\n",verbose? " ( best possible speed )":"");
+  fprintf (f, "G40%s\n",verbose? " ( turn off tool diameter compensation )":"");
+  fprintf (f, "G49%s\n",verbose? " ( turns off tool length compensation )":"");
+  fprintf (f, "G94%s\n",verbose? " ( Feed Rate Mode: Units per Minute Mode )":"");
+  fprintf (f, "G17%s\n",verbose? " ( X-Y plane )":"");
   fprintf (f, "M3 S10000\n");
 }
 
 /* generate g-code footer */
-void g_footer(FILE *f)
+void g_footer(FILE *f, char verbose)
 {
-  fprintf (f, "M5 (stop the spindle)\n");
-  fprintf (f, "M30 (Program stop, rewind to beginning of program)\n");
+  fprintf (f, "M5 %s\n",verbose? "(stop the spindle)":"");
+  fprintf (f, "M30 %s\n",verbose? "(Program stop, rewind to beginning of program)":"");
 }
 
 /* generate g-code body for all glyphs
@@ -108,10 +118,12 @@ int g_body ( FILE *f,\
              double Z_down,\
              const char *text)
 {
-  fprintf (f, "( Text=\"%s\", font=\"%s\" )\n",text, font);
-  fprintf (f, "( Scale=%f, feed=%f )\n",scale, feed);
+  if(verbose)
+  {
+    fprintf (f, "( Text=\"%s\", font=\"%s\" )\n",text, font);
+    fprintf (f, "( Scale=%f, feed=%f )\n",scale, feed);
+  }
   fprintf (f, "F%f\n", feed);
-  
   double left=0;
   char pen_down=0;
   const char *p=text;

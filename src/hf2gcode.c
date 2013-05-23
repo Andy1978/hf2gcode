@@ -6,8 +6,8 @@
   * the rendered text, linefeed with \n for multiple lines
   * if multiple lines, selectable left-, right- or center-align
   * scale factor: in first versions, a double multiplied with the hershey font coordinates
-  * 
-  * 
+  * feed rate in mm/min
+  * X offset, Y Offset, Z_up, Z_down
   * 
   * 
   */ 
@@ -122,9 +122,9 @@ main (int argc, char **argv)
     perror("main.c: Creation of output file failed:");
   else
   {
-    g_header (fn_gout);
+    g_header (fn_gout, arguments.verbose);
     g_body (fn_gout, arguments.verbose, arguments.args[0], 1, 500, 0, -3, arguments.args[1]);
-    g_footer (fn_gout);
+    g_footer (fn_gout, arguments.verbose);
 
     fclose(fn_gout);    
     

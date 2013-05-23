@@ -7,6 +7,7 @@ run: hf2gcode
 	./hf2gcode -v scriptc "Hello world!" -o hello_scriptc.ngc
 
 hf2gcode: hf2gcode.c libhf2gcode.c
+	$(MAKE) -C ../hershey_fonts gen_c_src/rowmans.h gen_c_src/scriptc.h
 	gcc $(CFLAGS) $^ -o $@
 
 clean:

@@ -1,7 +1,7 @@
 .PHONY:clean
 
-rowmans:
-	$(MAKE) -C hershey_fonts small_set
+simple:
+	$(MAKE) -C src
 
 all:
 	$(MAKE) -C hershey_fonts all
