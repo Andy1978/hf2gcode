@@ -5,7 +5,7 @@
 #endif
 
 #include "../hershey_fonts/gen_c_src/rowmans.h"
-#include "../hershey_fonts/gen_c_src/scriptc.h"
+//#include "../hershey_fonts/gen_c_src/scriptc.h"
 
 const char *argp_program_version = "hf2gcode 0.1 alpha";
 
@@ -41,8 +41,8 @@ const char *argp_program_version = "hf2gcode 0.1 alpha";
  *
  */
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "libhf2gcode.h"
 
@@ -73,12 +73,14 @@ const char * get_glyph_ptr (const char *font,
     ptr   = rowmans;
     index = c-32;
   }
+  /*
   else if (!strcmp(font, "scriptc"))
   {
     cnt   = scriptc_cnt;
     ptr   = scriptc;
     index = c-32;
   }
+  */
   else
   {
 #ifndef AVR
@@ -98,7 +100,16 @@ const char * get_glyph_ptr (const char *font,
   int k=0;
   while(k++<index)
   {
+#ifndef AVR
     while(*(ptr++)!=0);
+#else
+    while(pgm_read_byte(ptr++)!=0);
+
+    //char buf[10];
+    //itoa(k,buf,10);
+    //uart_puts(buf);
+    //uart_putc('\n');
+#endif
   }
   return ptr;
 }
@@ -211,14 +222,16 @@ int get_gcode_line (
     char c=_text[char_index];
 
     /*print state*/
-    //printf("DEBUG: c=%c ci=%d cg=%s xg=%f yg=%f ps=%d pa=%d i=%d gl=%d lm=%d rm=%d fl=%d\n",
-    //       c, char_index, glyph_ptr, x_glyph, y_glyph, pen_state, pen_above_pos, _init, g_line, left_margin, right_margin, footer_line);
+    /*
+     * printf("DEBUG: c=%c ci=%d cg=%s xg=%f yg=%f ps=%d pa=%d i=%d gl=%d lm=%d rm=%d fl=%d\n",
+           c, char_index, glyph_ptr, x_glyph, y_glyph, pen_state, pen_above_pos, _init, g_line, left_margin, right_margin, footer_line);
+    */
     if (c)
     {
       if(c=='\\' && _text[char_index+1]=='n')
       {
           x_glyph=0;
-          y_glyph-=30*_scale;    //ToDo, make param
+          y_glyph-=30*_scale;    /*ToDo, make param*/
           snprintf(buf, buf_len, "( Linefeed )");
           char_index+=2;
           return g_line++;
@@ -227,9 +240,13 @@ int get_gcode_line (
       {
         const char *glyph=get_glyph_ptr(_font,c);
 
-        //hier beim AVR spezielles copy
+#ifndef AVR
         current_glyph = malloc(strlen(glyph)+1);
         strcpy (current_glyph, glyph);
+#else
+        current_glyph = malloc(strlen_PF(glyph)+1);
+        strcpy_PF (current_glyph, glyph);
+#endif
         glyph_ptr=current_glyph;
         left_margin = *(glyph_ptr++)-'R';
         right_margin = *(glyph_ptr++)-'R';
