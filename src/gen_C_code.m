@@ -31,5 +31,5 @@ function gen_C_code(fn, fn_out)
   else
     error("couldn't create file")
     disp(msg)
-  endif  
+  endif
 endfunction
