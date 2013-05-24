@@ -33,15 +33,26 @@ const char *argp_program_version = "hf2gcode 0.1";
  * %f precision of generated g-code? %f6.3 per argument?
  * optimize output, check if X or Y command is the same, then drop that
  *
- *
- *
- *
- *
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "libhf2gcode.h"
+
+/* g-code generator init parameter */
+static char *_font;
+static char *_text;
+static double _X0;
+static double _Y0;
+static double _Z_up;
+static double _Z_down;
+static double _scale;
+static double _feed;
+static int _precision;
+static char _verbose;
+static char _align;
+static char _init;
 
 /* get pointer to start of the glyph or NULL if not available */
 char * get_glyph_ptr (const char *font,
@@ -67,111 +78,226 @@ char * get_glyph_ptr (const char *font,
     fprintf(stderr, "ERROR: font %s is not available.\n", font);
     return NULL;
   }
-//printf("index=%d, ptr=%x s=%s\n",index,ptr,ptr);
   if (index<0 || index>cnt-1)
   {
     fprintf(stderr, "ERROR: glyph number %d (ASCII 0x%X) is not available in font \"%s\".\n", index, c, font);
     return NULL;
   }
-  
+
   /*search the glyph*/
   int k=0;
   while(k++<index)
   {
     while(*(ptr++)!=0);
   }
-//printf("%s\n",ptr);
   return ptr;
 }
-
-/* generate g-code header */
-void g_header(FILE *f, char verbose)
+int init_get_gcode_line (
+             char *font,   /* used font, e.g. "rowmans" or "scriptc" */
+             char *text,   /* text, e.g. "Hello world!\nsecond line" */
+             double X0,          /* the X-Axis offset in mm */
+             double Y0,          /* the Y-Axis offset in mm */
+             double Z_up,        /* the Z-Axis value in mm when it's up */
+             double Z_down,      /* the Z-Axis value in mm when it's down */
+             double scale,       /* Scale factor (mm/hershey units) */
+             double feed,        /* Linear feed rate in mm/min */
+             int precision,
+             char verbose,       /* Verbose description in generated G-Code */
+             char align)         /* Align lines l(eft) r(ight) c(enter) */
 {
-  fprintf (f, "( generated with %s )\n",argp_program_version);
-  fprintf (f, "G21%s\n",verbose? " ( units in mm )":"");
-  fprintf (f, "G90%s\n",verbose? " ( absolute distance mode )":"");
-  fprintf (f, "G64%s\n",verbose? " ( best possible speed )":"");
-  fprintf (f, "G40%s\n",verbose? " ( turn off tool diameter compensation )":"");
-  fprintf (f, "G49%s\n",verbose? " ( turns off tool length compensation )":"");
-  fprintf (f, "G94%s\n",verbose? " ( Feed Rate Mode: Units per Minute Mode )":"");
-  fprintf (f, "G17%s\n",verbose? " ( X-Y plane )":"");
-  fprintf (f, "M3 S10000\n");
-}
+  _font=font;
+  _text=text;
+  _X0=X0;
+  _Y0=Y0;
+  _Z_up=Z_up;
+  _Z_down=Z_down;
+  _scale=scale;
+  _feed=feed;
+  _precision=precision;
+  _verbose=verbose;
+  _align=align;
+  _init=0;
 
-/* generate g-code footer */
-void g_footer(FILE *f, char verbose)
-{
-  fprintf (f, "M5 %s\n",verbose? "(stop the spindle)":"");
-  fprintf (f, "M30 %s\n",verbose? "(Program stop, rewind to beginning of program)":"");
-}
-
-/* generate g-code body for all glyphs
- * 
- * RETURN -1 if target buffer is to small, else 0 if success
- */
-int g_body ( FILE *f,\
-             char verbose,\
-             const char *font,\
-             double scale,\
-             double feed,\
-             double Z_up,\
-             double Z_down,\
-             const char *text)
-{
-  if(verbose)
+  /* check text (all glyphs available in font?) */
+  char *p=text;
+  while(*p)
   {
-    fprintf (f, "( Text=\"%s\", font=\"%s\" )\n",text, font);
-    fprintf (f, "( Scale=%f, feed=%f )\n",scale, feed);
+    char *tmp= get_glyph_ptr (_font,*p);
+    if (!tmp)
+      return -1;
+    p++;
   }
-  fprintf (f, "F%f\n", feed);
-  double left=0;
-  char pen_down=0;
-  const char *p=text;
-  char c;
-  while((c=*(p++)))
-  {
-    char *glyph=get_glyph_ptr(font,c);
-    if (verbose)
-      fprintf(f, "( %c = %s )\n",c, glyph);
-
-    char left_margin = *(glyph++)-'R';
-    char right_margin = *(glyph++)-'R';
-    
-    while(*glyph)
-    {
-      char x=*(glyph++)-'R';
-      char y=*(glyph++)-'R';
-      
-      if (x==-50 && y==0) /*Pen-Up*/
-      {
-        fprintf(f, "G0 Z%f\n", Z_up);
-        pen_down=0;
-      }
-      else
-      {
-        double gx = left+(x-left_margin)*scale;
-        double gy = -y*scale;
-        if(pen_down)
-        {
-          fprintf(f, "G1 X%f Y%f\n", gx, gy);
-        }  
-        else
-        {
-          fprintf(f, "G0 X%f Y%f\n", gx, gy);
-          fprintf(f, "G1 X%f Y%f Z%f\n", gx, gy, Z_down);
-          pen_down = 1;
-        }
-      }
-    }
-    
-    /* Pen-Up */
-    fprintf(f, "G0 Z%f\n", Z_up);
-    pen_down=0;
-    
-    /* add glyph width to left position */
-    left+=(right_margin-left_margin)*scale;
-  
-  }
+  _init=1;
   return 0;
 }
 
+int get_gcode_line (
+             char * buf,          /* buffer for g-code line output */
+             size_t buf_len)      /* length of buf */
+{
+  /* g-code generator state */
+  static int char_index=0;
+  static char* current_glyph=0;
+  static char* glyph_ptr=0;
+  static double x_glyph=0;
+  static double y_glyph=0;
+  static enum ePenState {Up=0, Down} pen_state;
+  static char pen_above_pos=0;
+  static int g_line=0;
+  static char left_margin=0;
+  static char right_margin=0;
+  static int footer_line=0;
+
+  if (_init==0)  /* not initialized */
+  {
+    *buf=0;
+    return -1;
+  }
+  else if (_init==1)
+  {
+    char_index  = 0;
+    x_glyph     = _X0;
+    y_glyph     = _Y0;
+    pen_state   = Up;
+    pen_above_pos = 0;
+    g_line      = 0;
+    left_margin = 0;
+    right_margin= 0;
+    footer_line = 0;
+    _init       = 2;
+  }
+  char* p;
+  switch(g_line)
+  {
+    case 0: snprintf(buf, buf_len, "( generated with %s )",argp_program_version);
+    return g_line++;
+    case 1: snprintf(buf, buf_len, "G21%s",_verbose? " ( units in mm )":"");
+    return g_line++;
+    case 2: snprintf(buf, buf_len, "G21%s",_verbose? " ( units in mm )":"");
+    return g_line++;
+    case 3: snprintf(buf, buf_len, "G90%s",_verbose? " ( absolute distance mode )":"");
+    return g_line++;
+    case 4: snprintf(buf, buf_len, "G64%s",_verbose? " ( best possible speed )":"");
+    return g_line++;
+    case 5: snprintf(buf, buf_len, "G40%s",_verbose? " ( turn off tool diameter compensation )":"");
+    return g_line++;
+    case 6: snprintf(buf, buf_len, "G49%s",_verbose? " ( turns off tool length compensation )":"");
+    return g_line++;
+    case 7: snprintf(buf, buf_len, "G94%s",_verbose? " ( Feed Rate Mode: Units per Minute Mode )":"");
+    return g_line++;
+    case 8: snprintf(buf, buf_len, "G17%s",_verbose? " ( X-Y plane )":"");
+    return g_line++;
+    case 9: snprintf(buf, buf_len, "M3 S10000");
+    return g_line++;
+    case 10: if(_verbose) snprintf(buf, buf_len, "( text=\"%s\", font=\"%s\" )",_text, _font);
+    return g_line++;
+    case 11: if(_verbose) snprintf(buf, buf_len, "( scale=%f, feed=%f )",_scale, _feed);
+    return g_line++;
+    case 12: snprintf(buf, buf_len, "F%f", _feed);
+    return g_line++;
+    case 13: snprintf(buf, buf_len, "G0 Z%f%s",_Z_up, _verbose? " ( Pen-Up at start)":"");
+    return g_line++;
+    default:
+      break;
+  }
+
+  if(g_line>13)
+  {
+    char c=_text[char_index];
+
+    /*print state*/
+    //printf("DEBUG: c=%c ci=%d cg=%s xg=%f yg=%f ps=%d pa=%d i=%d gl=%d lm=%d rm=%d fl=%d\n",
+    //       c, char_index, glyph_ptr, x_glyph, y_glyph, pen_state, pen_above_pos, _init, g_line, left_margin, right_margin, footer_line);
+    if (c)
+    {
+      if(c=='\\' && _text[char_index+1]=='n')
+      {
+          x_glyph=0;
+          y_glyph-=30*_scale;    //ToDo, make param
+          snprintf(buf, buf_len, "( Linefeed )");
+          char_index+=2;
+          return g_line++;
+      }
+      if(!current_glyph) /*load new glyph */
+      {
+        char *glyph=get_glyph_ptr(_font,c);
+
+        //hier beim AVR spezielles copy
+        current_glyph = malloc(strlen(glyph)+1);
+        strcpy (current_glyph, glyph);
+        glyph_ptr=current_glyph;
+        left_margin = *(glyph_ptr++)-'R';
+        right_margin = *(glyph_ptr++)-'R';
+
+        snprintf(buf, buf_len, "( %c = %s )",c, _verbose? glyph_ptr:"");
+        return g_line++;
+      }
+      else if(!(*glyph_ptr)) /*end of glyph*/
+      {
+        char_index++;
+        /* add glyph width to left position */
+        x_glyph+=(right_margin-left_margin)*_scale;
+
+        free(current_glyph);
+        current_glyph=0;
+
+        snprintf(buf, buf_len, "G0 Z%f%s",_Z_up, _verbose? " ( Pen-Up, EOG )":"");
+        pen_state=Up;
+        return g_line++;
+      }
+      char x=*(glyph_ptr)-'R';
+      char y=*(glyph_ptr+1)-'R';
+
+      if (x==-50 && y==0) /*Pen-Up*/
+      {
+        snprintf(buf, buf_len, "G0 Z%f%s",_Z_up, _verbose? " ( Pen-Up )":"");
+        pen_state=Up;
+        glyph_ptr+=2;
+        return g_line++;
+      }
+      else
+      {
+        double gx = x_glyph+(x-left_margin)*_scale;
+        double gy = y_glyph-y*_scale;
+        if( pen_state == Down )
+        {
+          /*Linear move to position*/
+          snprintf(buf, buf_len, "G1 X%f Y%f", gx, gy);
+          glyph_ptr+=2;
+          return g_line++;
+        }
+        else
+        {
+          if (!pen_above_pos)
+          {
+            /*rapid move because pen is up*/
+            snprintf(buf, buf_len, "G0 X%f Y%f", gx, gy);
+            glyph_ptr+=2;
+            pen_above_pos=1;
+            return g_line++;
+          }
+          else
+          {
+            /* lower pen*/
+            snprintf(buf, buf_len, "G1 Z%f%s",_Z_down, _verbose? " ( Pen-Down )":"");
+            pen_state = Down;
+            pen_above_pos=0;
+            return g_line++;
+          }
+        }
+      }
+    }
+
+    /*end of text*/
+    switch (footer_line++)
+    {
+      case 0: snprintf(buf, buf_len, "M5 %s",_verbose? "(stop the spindle)":"");
+      return g_line++;
+      case 1: snprintf(buf, buf_len, "M30 %s",_verbose? "(Program stop, rewind to beginning of program)":"");
+      return g_line++;
+      default:
+        break;
+    }
+  }
+  return -1;
+}

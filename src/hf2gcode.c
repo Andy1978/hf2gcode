@@ -1,6 +1,6 @@
- /* 
+ /*
   * hf2gcode, Copyright 2013 Andreas Weber
-  * 
+  *
   * There have to be params for:
   * the used hershey font, for example 'rowmans'
   * the rendered text, linefeed with \n for multiple lines
@@ -8,9 +8,9 @@
   * scale factor: in first versions, a double multiplied with the hershey font coordinates
   * feed rate in mm/min
   * X offset, Y Offset, Z_up, Z_down
-  * 
-  * 
-  */ 
+  *
+  *
+  */
 
 #include <stdlib.h>
 #include <string.h>
@@ -122,12 +122,24 @@ main (int argc, char **argv)
     perror("main.c: Creation of output file failed:");
   else
   {
-    g_header (fn_gout, arguments.verbose);
-    g_body (fn_gout, arguments.verbose, arguments.args[0], 1, 500, 0, -3, arguments.args[1]);
-    g_footer (fn_gout, arguments.verbose);
-
-    fclose(fn_gout);    
-    
+    int r = init_get_gcode_line (arguments.args[0],
+                                 arguments.args[1],
+                                 0,
+                                 0,
+                                 1,
+                                 -2,
+                                 0.23,
+                                 500,
+                                 3,
+                                 arguments.verbose,
+                                 'l');
+    char buf[200];
+    int gl;
+    while((gl = get_gcode_line (buf, 200))!=-1)
+    {
+      fprintf(fn_gout, "%s\n",buf);
+    }
+    fclose(fn_gout);
   }
 
 
