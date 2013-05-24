@@ -14,7 +14,7 @@ function gen_C_code(fn, fn_out)
   if (fid != -1)
     fprintf(fid, "/* number of glyphs in font */\nunsigned char %s_cnt = %d;\n", NAME, length(hf));
     fprintf(fid, "/* Format: margin left, margin right, X, Y ... \\0\n< R> is pen-up, see original hershey font */\n");
-    fprintf(fid, "char %s []=",NAME);
+    fprintf(fid, "const char %s [] PROGMEM=",NAME);
     for i=1:length(hf);
       glyph=hf(i);
       l=length(glyph.x);

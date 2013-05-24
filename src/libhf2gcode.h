@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-char * get_glyph_ptr (const char *font,
+const char * get_glyph_ptr (const char *font,
                       const unsigned char c);
 
 int init_get_gcode_line (

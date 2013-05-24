@@ -1,7 +1,13 @@
+#ifndef AVR
+  #define PROGMEM
+#else
+  #include <avr/pgmspace.h>
+#endif
+
 #include "../hershey_fonts/gen_c_src/rowmans.h"
 #include "../hershey_fonts/gen_c_src/scriptc.h"
 
-const char *argp_program_version = "hf2gcode 0.1";
+const char *argp_program_version = "hf2gcode 0.1 alpha";
 
 /*
  http://linuxcnc.org/docs/html/gcode.html
@@ -55,11 +61,11 @@ static char _align;
 static char _init;
 
 /* get pointer to start of the glyph or NULL if not available */
-char * get_glyph_ptr (const char *font,
+const char * get_glyph_ptr (const char *font,
                       const unsigned char c)
 {
   int cnt   = 0;
-  char *ptr = NULL;
+  const char *ptr = NULL;
   int index = 0;
   if (!strcmp(font, "rowmans"))
   {
@@ -75,12 +81,16 @@ char * get_glyph_ptr (const char *font,
   }
   else
   {
+#ifndef AVR
     fprintf(stderr, "ERROR: font %s is not available.\n", font);
+#endif
     return NULL;
   }
   if (index<0 || index>cnt-1)
   {
+#ifndef AVR
     fprintf(stderr, "ERROR: glyph number %d (ASCII 0x%X) is not available in font \"%s\".\n", index, c, font);
+#endif
     return NULL;
   }
 
@@ -119,10 +129,10 @@ int init_get_gcode_line (
   _init=0;
 
   /* check text (all glyphs available in font?) */
-  char *p=text;
+  const char *p=text;
   while(*p)
   {
-    char *tmp= get_glyph_ptr (_font,*p);
+    const char *tmp= get_glyph_ptr (_font,*p);
     if (!tmp)
       return -1;
     p++;
@@ -166,42 +176,37 @@ int get_gcode_line (
     footer_line = 0;
     _init       = 2;
   }
-  char* p;
   switch(g_line)
   {
     case 0: snprintf(buf, buf_len, "( generated with %s )",argp_program_version);
     return g_line++;
     case 1: snprintf(buf, buf_len, "G21%s",_verbose? " ( units in mm )":"");
     return g_line++;
-    case 2: snprintf(buf, buf_len, "G21%s",_verbose? " ( units in mm )":"");
+    case 2: snprintf(buf, buf_len, "G90%s",_verbose? " ( absolute distance mode )":"");
     return g_line++;
-    case 3: snprintf(buf, buf_len, "G90%s",_verbose? " ( absolute distance mode )":"");
+    case 3: snprintf(buf, buf_len, "G64%s",_verbose? " ( best possible speed )":"");
     return g_line++;
-    case 4: snprintf(buf, buf_len, "G64%s",_verbose? " ( best possible speed )":"");
+    case 4: snprintf(buf, buf_len, "G40%s",_verbose? " ( turn off tool diameter compensation )":"");
     return g_line++;
-    case 5: snprintf(buf, buf_len, "G40%s",_verbose? " ( turn off tool diameter compensation )":"");
+    case 5: snprintf(buf, buf_len, "G49%s",_verbose? " ( turns off tool length compensation )":"");
     return g_line++;
-    case 6: snprintf(buf, buf_len, "G49%s",_verbose? " ( turns off tool length compensation )":"");
+    case 6: snprintf(buf, buf_len, "G94%s",_verbose? " ( Feed Rate Mode: Units per Minute Mode )":"");
     return g_line++;
-    case 7: snprintf(buf, buf_len, "G94%s",_verbose? " ( Feed Rate Mode: Units per Minute Mode )":"");
+    case 7: snprintf(buf, buf_len, "G17%s",_verbose? " ( X-Y plane )":"");
     return g_line++;
-    case 8: snprintf(buf, buf_len, "G17%s",_verbose? " ( X-Y plane )":"");
+    case 8: snprintf(buf, buf_len, "M3 S10000");
     return g_line++;
-    case 9: snprintf(buf, buf_len, "M3 S10000");
+    case 9: if(_verbose) {snprintf(buf, buf_len, "( text=\"%s\", font=\"%s\" )",_text, _font); return g_line++;} else g_line++;
+    case 10: if(_verbose) {snprintf(buf, buf_len, "( scale=%f, feed=%f )",_scale, _feed); return g_line++;} else g_line++;
+    case 11: snprintf(buf, buf_len, "F%f", _feed);
     return g_line++;
-    case 10: if(_verbose) snprintf(buf, buf_len, "( text=\"%s\", font=\"%s\" )",_text, _font);
-    return g_line++;
-    case 11: if(_verbose) snprintf(buf, buf_len, "( scale=%f, feed=%f )",_scale, _feed);
-    return g_line++;
-    case 12: snprintf(buf, buf_len, "F%f", _feed);
-    return g_line++;
-    case 13: snprintf(buf, buf_len, "G0 Z%f%s",_Z_up, _verbose? " ( Pen-Up at start)":"");
+    case 12: snprintf(buf, buf_len, "G0 Z%f%s",_Z_up, _verbose? " ( Pen-Up at start)":"");
     return g_line++;
     default:
       break;
   }
 
-  if(g_line>13)
+  if(g_line>12)
   {
     char c=_text[char_index];
 
@@ -220,7 +225,7 @@ int get_gcode_line (
       }
       if(!current_glyph) /*load new glyph */
       {
-        char *glyph=get_glyph_ptr(_font,c);
+        const char *glyph=get_glyph_ptr(_font,c);
 
         //hier beim AVR spezielles copy
         current_glyph = malloc(strlen(glyph)+1);
