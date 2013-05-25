@@ -27,7 +27,8 @@ function gen_C_code(fn, fn_out)
   hf = load_hf (fn);
   [fid, MSG] = fopen(fn_out,"w");
   if (fid != -1)
-    fprintf(fid, "/* number of glyphs in font */\nunsigned char %s_cnt = %d;\n", NAME, length(hf));
+    fprintf(fid, "/* This file was generated with gen_C_code.m from %s */\n\n",fn);
+    fprintf(fid, "/* number of glyphs in font */\nunsigned char %s_cnt = %d;\n\n", NAME, length(hf));
     fprintf(fid, "/* Format: margin left, margin right, X, Y ... \\0\n< R> is pen-up, see original hershey font */\n");
     fprintf(fid, "const char %s [] PROGMEM=",NAME);
     for i=1:length(hf);
@@ -42,6 +43,7 @@ function gen_C_code(fn, fn_out)
       fprintf(fid,"\"%s\\0\"\\\n",s)
     endfor
     fprintf(fid,";\n")
+    fprintf(fid, "/* End of file %s */\n",fn_out);
     fclose(fid);
   else
     error("couldn't create file")
