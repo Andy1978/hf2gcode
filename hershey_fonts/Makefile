@@ -3,13 +3,14 @@
 fixed_hf = $(subst orig,fixed,$(wildcard orig/*.jhf))
 rendered_hf_png = $(patsubst %.jhf,%.png,$(subst orig,rendered_png,$(wildcard orig/*.jhf)))
 rendered_hf_svg = $(patsubst %.jhf,%.svg,$(subst orig,rendered_svg,$(wildcard orig/*.jhf)))
+gen_c = $(patsubst %.jhf,%.h,$(subst orig,gen_c_src,$(wildcard orig/*.jhf)))
 
 RENDER_DEP = ../src/load_hf.m ../src/plot_hf.m ../src/plot_hf_glyph.m ../src/render_hf.m
 
 ## Only the really interesting fonts
 small_set: $(fixed_hf) rendered_png/rowmans.png gen_c_src/rowmans.h rendered_png/scriptc.png gen_c_src/scriptc.h
 
-all: $(fixed_hf) $(rendered_hf_png) $(rendered_hf_svg)
+all: $(gen_c) $(rendered_hf_png) $(rendered_hf_svg)
 
 fixed/%.jhf: orig/%.jhf ./fix_linebreak.sh
 	@mkdir -p fixed

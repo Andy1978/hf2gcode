@@ -24,9 +24,9 @@
 #endif
 
 #include "../hershey_fonts/gen_c_src/rowmans.h"
-//#include "../hershey_fonts/gen_c_src/scriptc.h"
+#include "../hershey_fonts/gen_c_src/scriptc.h"
 
-const char *argp_program_version = "hf2gcode 0.1 alpha";
+const char *argp_program_version = "hf2gcode 0.1";
 
 /*
  http://linuxcnc.org/docs/html/gcode.html
@@ -92,14 +92,12 @@ const char * get_glyph_ptr (const char *font,
     ptr   = rowmans;
     index = c-32;
   }
-  /*
   else if (!strcmp(font, "scriptc"))
   {
     cnt   = scriptc_cnt;
     ptr   = scriptc;
     index = c-32;
   }
-  */
   else
   {
 #ifndef AVR
