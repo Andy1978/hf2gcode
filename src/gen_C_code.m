@@ -37,6 +37,7 @@ function gen_C_code(fn, fn_out)
       s=char([glyph.leftmargin glyph.x;glyph.rightmargin glyph.y](:)'+'R');
       ## escape some chars
       s = strrep(s, "\\", "\\\\");
+      s = strrep(s, "\"", "\\\"");
       if(i>1)
         fprintf(fid, "          ");
       endif
