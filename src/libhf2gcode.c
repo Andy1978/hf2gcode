@@ -24,7 +24,35 @@
 #endif
 
 #include "../hershey_fonts/gen_c_src/rowmans.h"
-#include "../hershey_fonts/gen_c_src/scriptc.h"
+#ifndef AVR
+  #include "../hershey_fonts/gen_c_src/cursive.h"
+  #include "../hershey_fonts/gen_c_src/futural.h"
+  #include "../hershey_fonts/gen_c_src/futuram.h"
+  #include "../hershey_fonts/gen_c_src/gothgbt.h"
+  #include "../hershey_fonts/gen_c_src/gothgrt.h"
+  #include "../hershey_fonts/gen_c_src/gothiceng.h"
+  #include "../hershey_fonts/gen_c_src/gothicger.h"
+  #include "../hershey_fonts/gen_c_src/gothicita.h"
+  #include "../hershey_fonts/gen_c_src/gothitt.h"
+  #include "../hershey_fonts/gen_c_src/greekc.h"
+  #include "../hershey_fonts/gen_c_src/greek.h"
+  #include "../hershey_fonts/gen_c_src/greeks.h"
+  #include "../hershey_fonts/gen_c_src/rowmand.h"
+  #include "../hershey_fonts/gen_c_src/rowmant.h"
+  #include "../hershey_fonts/gen_c_src/scriptc.h"
+  #include "../hershey_fonts/gen_c_src/scripts.h"
+  #include "../hershey_fonts/gen_c_src/symbolic.h"
+  #include "../hershey_fonts/gen_c_src/timesg.h"
+  #include "../hershey_fonts/gen_c_src/timesib.h"
+  #include "../hershey_fonts/gen_c_src/timesi.h"
+  #include "../hershey_fonts/gen_c_src/timesrb.h"
+  #include "../hershey_fonts/gen_c_src/timesr.h"
+#endif
+
+#define FONT_TABLE(x) if (!strcmp(font, #x)) \
+  { cnt   = x##_cnt; \
+    ptr   = x;     \
+    index = c-32;} /*for ASCII fonts, will not work with e.g. japanese*/
 
 const char *argp_program_version = "hf2gcode 0.1";
 
@@ -86,18 +114,30 @@ const char * get_glyph_ptr (const char *font,
   int cnt   = 0;
   const char *ptr = NULL;
   int index = 0;
-  if (!strcmp(font, "rowmans"))
-  {
-    cnt   = rowmans_cnt;
-    ptr   = rowmans;
-    index = c-32;
-  }
-  else if (!strcmp(font, "scriptc"))
-  {
-    cnt   = scriptc_cnt;
-    ptr   = scriptc;
-    index = c-32;
-  }
+
+  FONT_TABLE(rowmans)
+  else FONT_TABLE(cursive)
+  else FONT_TABLE(futural)
+  else FONT_TABLE(futuram)
+  else FONT_TABLE(gothgbt)
+  else FONT_TABLE(gothgrt)
+  else FONT_TABLE(gothiceng)
+  else FONT_TABLE(gothicger)
+  else FONT_TABLE(gothicita)
+  else FONT_TABLE(gothitt)
+  else FONT_TABLE(greekc)
+  else FONT_TABLE(greek)
+  else FONT_TABLE(greeks)
+  else FONT_TABLE(rowmand)
+  else FONT_TABLE(rowmant)
+  else FONT_TABLE(scriptc)
+  else FONT_TABLE(scripts)
+  else FONT_TABLE(symbolic)
+  else FONT_TABLE(timesg)
+  else FONT_TABLE(timesib)
+  else FONT_TABLE(timesi)
+  else FONT_TABLE(timesrb)
+  else FONT_TABLE(timesr)
   else
   {
 #ifndef AVR
