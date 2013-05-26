@@ -32,9 +32,10 @@ int init_get_gcode_line (
              double Y0,          /* the Y-Axis offset in mm */
              double Z_up,        /* the Z-Axis value in mm when it's up */
              double Z_down,      /* the Z-Axis value in mm when it's down */
+             double yinc,        /* increment between to lines for multiline */
              double scale,       /* Scale factor (mm/hershey units) */
              double feed,        /* Linear feed rate in mm/min */
-             int precision,
+             int precision,      /* Precision for floating points in generated g-code */
              char verbose,       /* Verbose description in generated G-Code */
              char align);        /* Align lines l(eft) r(ight) c(enter) */
 

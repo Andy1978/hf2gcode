@@ -18,16 +18,9 @@
 */
 
 
-/* TODO
- * precision noch implementieren,
-       An optional precision, in the form of a period ('.')  followed by an optional decimal digit string.  Instead of a  decimal
-       digit  string  one  may write "*" or "*m$" (for some decimal integer m) to specify that the precision is given in the next
-       argument, or in the m-th argument, respectively, which must be of type int.  If the precision is given as just '.', or the
-       precision  is negative, the precision is taken to be zero.  This gives the minimum number of digits to appear for d, i, o,
-       u, x, and X conversions, the number of digits to appear after the radix character for a, A, e, E, f,  and  F  conversions,
-       the maximum number of significant digits for g and G conversions, or the maximum number of characters to be printed from a
-       string for s and S conversions.
- * multiline, right, center
+/* TODO, see README.md
+   allow text from stdin. Perhaps an optional --text "hello!"
+   or reading from file? - as stdin?
 */
 
 #include <stdlib.h>
@@ -57,7 +50,7 @@ static struct argp_option options[] = {
  {"yoffset",      'y', "Y0",    0, "Y-Axis offset (default 0)", 0 },
  {"z-up",         'u', "ZUp",   0, "Pen-Up Z value (default 1)", 0 },
  {"z-down",       'd', "ZDown", 0, "Pen-Down Z value (default -1)", 0 },
- {"interline",    'n', "YINC",  0, "Interline spacing in Y direction for multiple lines (default 30)", 0 },
+ {"interline",    'n', "YINC",  0, "Interline spacing in Y direction for multiple lines (default 15)", 0 },
  {"align-left",   'l', 0,       0, "Left align multiple lines (default)", 0},
  {"align-right",  'r', 0,       0, "Right align multiple lines", 0},
  {"align-center", 'c', 0,       0, "Center multiple lines", 0},
@@ -65,7 +58,7 @@ static struct argp_option options[] = {
  {"precision",    'p', "PREC",  0, "Precision for G-Code generation (default 3)", 0},
  {"inch",         'i', 0,       0, "Use inch as base unit (default mm)", 0},
  {"quiet",    'q', 0,      0,  "Don't produce any output", 0},
- { 0 }
+ { 0,0,0,0,0,0 }
 };
 
 enum eAlign {left=0, right, center};
@@ -218,7 +211,7 @@ main (int argc, char **argv)
   arguments.yoffset      = 0.0;
   arguments.z_up         = 1.0;
   arguments.z_down       = -1.0;
-  arguments.y_interline  = 30;
+  arguments.y_interline  = 15;
   arguments.align        = left;
   arguments.base         = mm;
   arguments.min_gcode    = 0;
@@ -245,9 +238,7 @@ main (int argc, char **argv)
     printf("Y interline        : %f %s\n", arguments.y_interline, get_base_unit(arguments));
     printf("Multiline align    : %s\n", (arguments.align == left)? "left": ((arguments.align == right)? "right" : "center"));
     printf("Minimalistic gcode : %s\n", (arguments.min_gcode)? "yes": "no");
-    //printf("Number of G0 moves :
-    //printf("Number of G1 moves :
-
+    printf("Precision          : %d\n", arguments.prec);
   }
 
   /* check not implemented params */
@@ -263,33 +254,43 @@ main (int argc, char **argv)
     exit(EXIT_FAILURE);
   }
 
-  FILE *fn_gout=NULL;
-  if (!strcmp (arguments.output_file, "-"))
-    fn_gout = stdout;
-  else
-    fn_gout = fopen(arguments.output_file, "w");
-  if (!fn_gout)
-    perror("main.c: Creation of output file failed:");
-  else
-  {
-    int r = init_get_gcode_line (arguments.font,
+  int init_ret = init_get_gcode_line (arguments.font,
                                  arguments.text,
                                  arguments.xoffset,
                                  arguments.yoffset,
                                  arguments.z_up,
                                  arguments.z_down,
+                                 arguments.y_interline,
                                  arguments.scale,
                                  arguments.feed,
                                  arguments.prec,
                                  !arguments.min_gcode,
                                  'l');
-    char buf[200];
-    int gl;
-    while((gl = get_gcode_line (buf, 200))!=-1)
+
+  if (!init_ret)  /* init successful */
+  {
+    FILE *fn_gout=NULL;
+    if (!strcmp (arguments.output_file, "-"))
+      fn_gout = stdout;
+    else
+      fn_gout = fopen(arguments.output_file, "w");
+    if (!fn_gout)
+      perror("main.c: Creation of output file failed:");
+    else
     {
-      fprintf(fn_gout, "%s\n",buf);
+      char buf[1000];
+      int gl;
+      while((gl = get_gcode_line (buf, 1000))!=-1)
+      {
+        fprintf(fn_gout, "%s\n",buf);
+      }
+      fclose(fn_gout);
     }
-    fclose(fn_gout);
+  }
+  else /*init failed*/
+  {
+    fprintf(stderr, "ERROR: Initialisation of g-code generator failed. Your text may contain some characters which are not available in the selected font\n");
+    exit(EXIT_FAILURE);
   }
  exit (0);
 }

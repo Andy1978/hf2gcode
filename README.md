@@ -79,9 +79,9 @@ http://wiki.linuxcnc.org/cgi-bin/wiki.pl?Build_A_Simulator_Manually
 Bugs or not yet implemented features
 ------------------------------------
 
-Switch base unit from "mm" (default) to inch has no effect in output
+Switching the base unit from "mm" (default) to inch has not yet an effect in the generated output.
 
-No optimal g-code generation, the X or Y value for previous set values can be omitted. You will see output like
+No optimal small g-code generation: the X or Y value for previous set values can be omitted. You will see output like
 
      G1 X5 Y5
      G1 X5 Y10
@@ -92,11 +92,6 @@ which could be written as
 
 No multiline align-right or align-center, align-left will be used.
 
-Interline spacing in Y direction for multiple lines. A value of 30 will be used
-
-Precision argument has no effect on generated output. Until the output will have maximum precision, e.g.
-    G0 X107.407407 Y-9.876543
- 
 License
 -------
 GPLv3, see file LICENSE

@@ -1,4 +1,5 @@
 .PHONY:clean
+.PHONY:realclean:
 
 fixed_hf = $(subst orig,fixed,$(wildcard orig/*.jhf))
 rendered_hf_png = $(patsubst %.jhf,%.png,$(subst orig,rendered_png,$(wildcard orig/*.jhf)))
@@ -32,4 +33,6 @@ clean:
 	rm -rf fixed
 	rm -rf rendered_png rendered_svg
 	rm -rf png_album
+
+realclean:
 	rm -rf gen_c_src
