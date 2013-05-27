@@ -1,5 +1,5 @@
 .PHONY:clean
-.PHONY:realclean:
+.PHONY:realclean
 
 fixed_hf = $(subst orig,fixed,$(wildcard orig/*.jhf))
 rendered_hf_png = $(patsubst %.jhf,%.png,$(subst orig,rendered_png,$(wildcard orig/*.jhf)))
@@ -8,10 +8,11 @@ gen_c = $(patsubst %.jhf,%.h,$(subst orig,gen_c_src,$(wildcard orig/*.jhf)))
 
 RENDER_DEP = ../src/load_hf.m ../src/plot_hf.m ../src/plot_hf_glyph.m ../src/render_hf.m
 
-## Only the really interesting fonts
-small_set: $(fixed_hf) rendered_png/rowmans.png gen_c_src/rowmans.h rendered_png/scriptc.png gen_c_src/scriptc.h
+## Only the C src, do not render fonts with octave
+src: $(gen_c)
 
-all: $(gen_c) $(rendered_hf_png) $(rendered_hf_svg)
+## Make all, render even all fonts to PNG and SVG
+all: src $(rendered_hf_png) $(rendered_hf_svg)
 
 fixed/%.jhf: orig/%.jhf ./fix_linebreak.sh
 	@mkdir -p fixed
@@ -34,5 +35,5 @@ clean:
 	rm -rf rendered_png rendered_svg
 	rm -rf png_album
 
-realclean:
-	rm -rf gen_c_src
+realclean: clean
+	./realclean.sh
