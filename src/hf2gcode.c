@@ -18,9 +18,12 @@
 */
 
 
-/* TODO, see README.md
-   allow text from stdin. Perhaps an optional --text "hello!"
+/*
+   TODO, see also README.md
+   Allow read text from stdin. Perhaps an optional --text "hello!"
    or reading from file? - as stdin?
+
+   so something like echo "huhu" |./hf2gcode is possible?
 */
 
 #include <stdlib.h>
@@ -289,7 +292,9 @@ main (int argc, char **argv)
   }
   else /*init failed*/
   {
-    fprintf(stderr, "ERROR: Initialisation of g-code generator failed. Your text may contain some characters which are not available in the selected font\n");
+    fprintf(stderr, "ERROR: Initialisation of g-code generator failed. Your text may contain some characters which are not available in the selected font.\n");
+    if(!arguments.quiet)
+      printf("INFO: available fonts: rowmans, cursive, futural, futuram, gothgbt, gothgrt, gothiceng, gothicger, gothicita, gothitt, greekc, greek, greeks, rowmand, rowmant, scriptc, scripts, symbolic, timesg, timesib, timesi, timesrb, timesr\n");
     exit(EXIT_FAILURE);
   }
  exit (0);
