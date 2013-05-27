@@ -218,7 +218,8 @@ int init_get_gcode_line (
   return 0;
 }
 
-int g_move(char * buf, size_t buf_len, int type, double gx, double gy)
+#ifndef FIXED_PRECISION
+void g_move(char * buf, size_t buf_len, int type, double gx, double gy)
 {
   int cnt;
   if(gx!=_X || gy!= _Y)
@@ -236,13 +237,19 @@ int g_move(char * buf, size_t buf_len, int type, double gx, double gy)
     buf_len-=cnt;
   }
   if (gy != _Y)
-  {
-    snprintf(buf, buf_len, " Y%.*f%n", _precision, gy, &cnt);
-  }
+    snprintf(buf, buf_len, " Y%.*f", _precision, gy);
   _X = gx;
   _Y = gy;
-  return 0;
 }
+#else
+void g_move(char * buf, size_t buf_len, int type, double gx, double gy)
+{
+  /*avr-libc doesn't have * or %n so always output with fixed precision*/
+  snprintf(buf, buf_len, "G%d X%.2f Y%.2f", type, gx, gy);
+  _X = gx;
+  _Y = gy;
+}
+#endif
 
 int get_gcode_line (
              char * buf,          /* buffer for g-code line output */
@@ -299,12 +306,35 @@ int get_gcode_line (
     return g_line++;
     case 8: snprintf(buf, buf_len, "M3 S10000");
     return g_line++;
-    case 9: if(_verbose) {snprintf(buf, buf_len, "; text=\"%s\", font=\"%s\"",_text, _font); return g_line++;} else g_line++;
-    case 10: if(_verbose) {snprintf(buf, buf_len, "( scale=%f, feed=%f, precision=%d )",_scale, _feed, _precision); return g_line++;} else g_line++;
-    case 11: snprintf(buf, buf_len, "F%.*f", _precision, _feed);
-    return g_line++;
-    case 12: snprintf(buf, buf_len, "G0 Z%.*f%s", _precision, _Z_up, _verbose? " ( Pen-Up at start)":""); _Z = _Z_up;
-    return g_line++;
+    case 9:
+      if(_verbose)
+      {
+        snprintf(buf, buf_len, "; text=\"%s\", font=\"%s\"",_text, _font);
+        return g_line++;
+      }
+      else g_line++;
+    case 10:
+      if(_verbose)
+      {
+        snprintf(buf, buf_len, "( scale=%f, feed=%f, precision=%d )",_scale, _feed, _precision);
+        return g_line++;
+      }
+      else g_line++;
+    case 11:
+#ifndef FIXED_PRECISION
+      snprintf(buf, buf_len, "F%.*f", _precision, _feed);
+#else
+      snprintf(buf, buf_len, "F%.2f", _feed);
+#endif
+      return g_line++;
+    case 12:
+#ifndef FIXED_PRECISION
+      snprintf(buf, buf_len, "G0 Z%.*f%s", _precision, _Z_up, _verbose? " ( Pen-Up at start)":"");
+#else
+      snprintf(buf, buf_len, "G0 Z%.2f%s", _Z_up, _verbose? " ( Pen-Up at start)":"");
+#endif
+      _Z = _Z_up;
+      return g_line++;
     default:
       break;
   }
@@ -359,7 +389,11 @@ int get_gcode_line (
         current_glyph=0;
 
         _Z = _Z_up;
+#ifndef FIXED_PRECISION
         snprintf(buf, buf_len, "G0 Z%.*f%s", _precision, _Z, _verbose? " ( Pen-Up, EOG )":"");
+#else
+        snprintf(buf, buf_len, "G0 Z%.2f%s", _Z, _verbose? " ( Pen-Up, EOG )":"");
+#endif
         pen_state=Up;
         return g_line++;
       }
@@ -369,7 +403,11 @@ int get_gcode_line (
       if (x==-50 && y==0) /*Pen-Up*/
       {
         _Z = _Z_up;
+#ifndef FIXED_PRECISION
         snprintf(buf, buf_len, "G0 Z%.*f%s", _precision, _Z, _verbose? " ( Pen-Up )":"");
+#else
+        snprintf(buf, buf_len, "G0 Z%.2f%s", _Z, _verbose? " ( Pen-Up )":"");
+#endif
         pen_state=Up;
         glyph_ptr+=2;
         return g_line++;
@@ -399,7 +437,11 @@ int get_gcode_line (
           {
             /* lower pen*/
             _Z = _Z_down;
+#ifndef FIXED_PRECISION
             snprintf(buf, buf_len, "G1 Z%.*f%s", _precision, _Z, _verbose? " ( Pen-Down )":"");
+#else
+            snprintf(buf, buf_len, "G1 Z%.2f%s", _Z, _verbose? " ( Pen-Down )":"");
+#endif
             pen_state = Down;
             pen_above_pos=0;
             return g_line++;
