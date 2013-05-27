@@ -83,8 +83,8 @@ const char *argp_program_version = "hf2gcode 0.1";
 */
 
 /* ToDo:
- * %f precision of generated g-code? %f6.3 per argument?
- * optimize output, check if X or Y command is the same, then drop that
+ * Don't Up the pen if the next position is the same. See a text which uses font scripts.
+ * For this the code should look at the first position of the next glyph stroke.
  *
  */
 
@@ -107,6 +107,7 @@ static char _verbose;
 static char _align;
 static char _init;
 static int _yinc;
+static double _X, _Y, _Z;
 
 /* get pointer to start of the glyph or NULL if not available */
 const char * get_glyph_ptr (const char *font,
@@ -117,6 +118,7 @@ const char * get_glyph_ptr (const char *font,
   int index = 0;
 
   FONT_TABLE(rowmans)
+#ifndef AVR
   else FONT_TABLE(cursive)
   else FONT_TABLE(futural)
   else FONT_TABLE(futuram)
@@ -139,6 +141,7 @@ const char * get_glyph_ptr (const char *font,
   else FONT_TABLE(timesi)
   else FONT_TABLE(timesrb)
   else FONT_TABLE(timesr)
+#endif
   else
   {
 #ifndef AVR
@@ -198,6 +201,9 @@ int init_get_gcode_line (
   _align=align;
   _yinc=yinc;
   _init=0;
+  _X=-1e20;
+  _Y=-1e20;
+  _Z=-1e20;
 
   /* check text (all glyphs available in font?) */
   const char *p=text;
@@ -209,6 +215,32 @@ int init_get_gcode_line (
     p++;
   }
   _init=1;
+  return 0;
+}
+
+int g_move(char * buf, size_t buf_len, int type, double gx, double gy)
+{
+  int cnt;
+  if(gx!=_X || gy!= _Y)
+  {
+    snprintf(buf, buf_len, "G%d%n", type, &cnt);
+    buf+=cnt;
+    buf_len-=cnt;
+  }
+  else
+    *buf=0;
+  if (gx != _X)
+  {
+    snprintf(buf, buf_len, " X%.*f%n", _precision, gx, &cnt);
+    buf+=cnt;
+    buf_len-=cnt;
+  }
+  if (gy != _Y)
+  {
+    snprintf(buf, buf_len, " Y%.*f%n", _precision, gy, &cnt);
+  }
+  _X = gx;
+  _Y = gy;
   return 0;
 }
 
@@ -271,7 +303,7 @@ int get_gcode_line (
     case 10: if(_verbose) {snprintf(buf, buf_len, "( scale=%f, feed=%f, precision=%d )",_scale, _feed, _precision); return g_line++;} else g_line++;
     case 11: snprintf(buf, buf_len, "F%.*f", _precision, _feed);
     return g_line++;
-    case 12: snprintf(buf, buf_len, "G0 Z%.*f%s", _precision, _Z_up, _verbose? " ( Pen-Up at start)":"");
+    case 12: snprintf(buf, buf_len, "G0 Z%.*f%s", _precision, _Z_up, _verbose? " ( Pen-Up at start)":""); _Z = _Z_up;
     return g_line++;
     default:
       break;
@@ -326,7 +358,8 @@ int get_gcode_line (
         free(current_glyph);
         current_glyph=0;
 
-        snprintf(buf, buf_len, "G0 Z%.*f%s", _precision, _Z_up, _verbose? " ( Pen-Up, EOG )":"");
+        _Z = _Z_up;
+        snprintf(buf, buf_len, "G0 Z%.*f%s", _precision, _Z, _verbose? " ( Pen-Up, EOG )":"");
         pen_state=Up;
         return g_line++;
       }
@@ -335,7 +368,8 @@ int get_gcode_line (
 
       if (x==-50 && y==0) /*Pen-Up*/
       {
-        snprintf(buf, buf_len, "G0 Z%.*f%s", _precision, _Z_up, _verbose? " ( Pen-Up )":"");
+        _Z = _Z_up;
+        snprintf(buf, buf_len, "G0 Z%.*f%s", _precision, _Z, _verbose? " ( Pen-Up )":"");
         pen_state=Up;
         glyph_ptr+=2;
         return g_line++;
@@ -347,7 +381,7 @@ int get_gcode_line (
         if( pen_state == Down )
         {
           /*Linear move to position*/
-          snprintf(buf, buf_len, "G1 X%.*f Y%.*f", _precision, gx, _precision, gy);
+          g_move(buf, buf_len, 1, gx, gy);
           glyph_ptr+=2;
           return g_line++;
         }
@@ -356,7 +390,7 @@ int get_gcode_line (
           if (!pen_above_pos)
           {
             /*rapid move because pen is up*/
-            snprintf(buf, buf_len, "G0 X%.*f Y%.*f", _precision, gx, _precision, gy);
+            g_move(buf, buf_len, 0, gx, gy);
             glyph_ptr+=2;
             pen_above_pos=1;
             return g_line++;
@@ -364,7 +398,8 @@ int get_gcode_line (
           else
           {
             /* lower pen*/
-            snprintf(buf, buf_len, "G1 Z%.*f%s", _precision, _Z_down, _verbose? " ( Pen-Down )":"");
+            _Z = _Z_down;
+            snprintf(buf, buf_len, "G1 Z%.*f%s", _precision, _Z, _verbose? " ( Pen-Down )":"");
             pen_state = Down;
             pen_above_pos=0;
             return g_line++;
