@@ -3,10 +3,10 @@ hf2gcode, a hershey font to g-code tracer
 ![demo_hello_world.ngc in LinuxCNC](http://tech-chat.de/images/demo_hello_world.png)
 (The image above shows src/demo_hello_word.ngc in LinuxCNCs simulator with sim/axis/axis_mm.ini)
 
-The current beta release is "hf2gcode 0.1",
-please see topic "Bugs or not yet implemented features" below before you report a bug.
+The current beta release is "hf2gcode 0.2",
+please see topic "Bugs" or "TODO" below before you report a bug.
 
-Available fonts in "hf2gcode 0.1":
+Available fonts in "hf2gcode 0.2":
 [cursive](http://www.tech-chat.de/hf/cursive.svg),
 [futural](http://www.tech-chat.de/hf/futural.svg),
 [futuram](http://www.tech-chat.de/hf/futuram.svg),
@@ -61,23 +61,30 @@ Help
     Usage: hf2gcode [OPTION...] TEXT
     hf2gcode, a hershey font to g-code tracer
 
-      -c, --align-center         Center multiple lines
+      -h, --font=FONT            Use FONT instead of default font "rowmans"
+      -o, --output=FILE          Output to FILE instead of standard output
+      -s, --scale=SCALE          Base unit/hershey font unit (default 0.5)
+
+     G-code base settings:
       -d, --z-down=ZDown         Pen-Down Z value (default -1)
       -f, --feed=FEED            Feed rate (default 200)
-      -h, --font=FONT            Use FONT instead of default font "rowmans"
-      -i, --inch                 Use inch as base unit (default mm)
-      -l, --align-left           Left align multiple lines (default)
-      -m, --min-gcode            Generate minimalistic g-code, suppress comments
-      -n, --interline=YINC       Interline spacing in Y direction for multiple
-                                 lines (default 30)
-      -o, --output=FILE          Output to FILE instead of standard output
-      -p, --precision=PREC       Precision for G-Code generation (default 3)
-      -q, --quiet                Don't produce any output
-      -r, --align-right          Right align multiple lines
-      -s, --scale=SCALE          Base unit/hershey font unit (default 0.5)
       -u, --z-up=ZUp             Pen-Up Z value (default 1)
       -x, --xoffset=X0           X-Axis offset (default 0)
       -y, --yoffset=Y0           Y-Axis offset (default 0)
+
+     Multiline settings:
+      -c, --align-center         Center multiple lines
+      -l, --align-left           Left align multiple lines (default)
+      -n, --interline=YINC       Interline spacing in Y direction for multiple
+                                 lines (default 15)
+      -r, --align-right          Right align multiple lines
+
+     Miscellaneous:
+      -i, --inch                 Use inch as base unit (default mm)
+      -m, --min-gcode            Generate minimalistic g-code, suppress comments
+      -p, --precision=PREC       Precision for G-Code generation (default 3)
+      -q, --quiet                Don't produce any output
+
       -?, --help                 Give this help list
           --usage                Give a short usage message
       -V, --version              Print program version
@@ -123,21 +130,18 @@ Install the dependencies with apt-get or aptitude
 
 Then run ./linuxcnc in linuxcnc/scripts and select a simulated machinge e.g. sim/axis/axis_mm.ini
 
-Bugs or not yet implemented features
+TODO / not yet implemented features
 ------------------------------------
 
-Switching the base unit from "mm" (default) to inch has not yet an effect in the generated output.
+*  Multiline align-right or align-center ist not yet implemented, please use the default "align-left" instead.
 
-No optimal small g-code generation: the X or Y value for previous set values can be omitted. You will see output like
+*  Don't lift the pen if the start position of the next glyph is the same as the end position of the current. For example see a text which uses font "scripts".
 
-     G1 X5 Y5
-     G1 X5 Y10
-which could be written as
+*  Allow read text from stdin. Perhaps an optional --text "hello!" or reading from file? - as stdin? So that "echo "huhu" |./hf2gcode" would work.
 
-     G1 X5 Y5
-     G1 Y10
-
-No multiline align-right or align-center, align-left will be used.
+Bugs
+----
+Zarro Boogs Found
 
 License
 -------
