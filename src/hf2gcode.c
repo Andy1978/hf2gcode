@@ -8,22 +8,13 @@
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
-  Foobar is distributed in the hope that it will be useful,
+  hf2gcode is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
   along with hf2gcode.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-
-/*
-   TODO, see also README.md
-   Allow read text from stdin. Perhaps an optional --text "hello!"
-   or reading from file? - as stdin?
-
-   so something like echo "huhu" |./hf2gcode is possible?
 */
 
 #include <stdlib.h>
@@ -92,7 +83,6 @@ const char* get_base_unit(struct arguments arg)
 {
   return (arg.base == mm)? "mm":"inch";
 }
-
 
 /* Parse a single option. */
 static error_t
@@ -271,7 +261,8 @@ main (int argc, char **argv)
                                  arguments.feed,
                                  arguments.prec,
                                  !arguments.min_gcode,
-                                 'l');
+                                 'l',
+                                 arguments.base == inch);
 
   if (!init_ret)  /* init successful */
   {

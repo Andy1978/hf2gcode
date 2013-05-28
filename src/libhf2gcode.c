@@ -8,7 +8,7 @@
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
-  Foobar is distributed in the hope that it will be useful,
+  hf2gcode is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
@@ -54,39 +54,7 @@
     ptr   = x;     \
     index = c-32;} /*for ASCII fonts, will not work with e.g. japanese*/
 
-const char *argp_program_version = "hf2gcode 0.1";
-
-/*
- http://linuxcnc.org/docs/html/gcode.html
-
- Kommentar mit ( ) oder ; am Anfang
- G91 ( incremental programming )
- G21 ( units in mm )
- G90 ( absolute distance mode )
- G64 ( best possible speed )
- G40 ( turn off tool diameter compensation )
- G49 ( turns off tool length compensation )
- G94 ( Feed Rate Mode: Units per Minute Mode )
- G17 ( X-Y plane )
- M3 S10000
-
- G0 X5 Y3.2
-
- M5 (stop the spindle)
- M30 (Program stop, rewind to beginning of program)
-
- Überlegen wie man den Needler mit grbl ein- und ausschaltet.
-  * Über Spindel ein-/aus? M3, M5?
-  * Möglicherweise auch über Kühlmittel Pins?
-  * Direction Pin der Z-Achse?
-  Am Besten konfigurierbar über Args, über Z-Achse default
-*/
-
-/* ToDo:
- * Don't Up the pen if the next position is the same. See a text which uses font scripts.
- * For this the code should look at the first position of the next glyph stroke.
- *
- */
+const char *argp_program_version = "hf2gcode 0.2";
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -105,6 +73,7 @@ static double _feed;
 static int _precision;
 static char _verbose;
 static char _align;
+static char _use_inch;
 static char _init;
 static int _yinc;
 static double _X, _Y, _Z;
@@ -165,11 +134,6 @@ const char * get_glyph_ptr (const char *font,
     while(*(ptr++)!=0);
 #else
     while(pgm_read_byte(ptr++)!=0);
-
-    //char buf[10];
-    //itoa(k,buf,10);
-    //uart_puts(buf);
-    //uart_putc('\n');
 #endif
   }
   return ptr;
@@ -186,7 +150,8 @@ int init_get_gcode_line (
              double feed,        /* Linear feed rate in mm/min */
              int precision,      /* Precision for floating points in generated g-code */
              char verbose,       /* Verbose description in generated G-Code */
-             char align)         /* Align lines l(eft) r(ight) c(enter) */
+             char align,         /* Align lines l(eft) r(ight) c(enter) */
+             char use_inch)      /* Use inch instead of mm as base unit */
 {
   _font=font;
   _text=text;
@@ -199,6 +164,7 @@ int init_get_gcode_line (
   _precision=precision;
   _verbose=verbose;
   _align=align;
+  _use_inch=use_inch;
   _yinc=yinc;
   _init=0;
   _X=-1e20;
@@ -290,7 +256,11 @@ int get_gcode_line (
   {
     case 0: snprintf(buf, buf_len, "( generated with %s )",argp_program_version);
     return g_line++;
-    case 1: snprintf(buf, buf_len, "G21%s",_verbose? " ( units in mm )":"");
+    case 1: 
+      if(!_use_inch)
+        snprintf(buf, buf_len, "G21%s",_verbose? " ( base unit mm )":"");
+      else
+        snprintf(buf, buf_len, "G20%s",_verbose? " ( base unit inch )":"");
     return g_line++;
     case 2: snprintf(buf, buf_len, "G90%s",_verbose? " ( absolute distance mode )":"");
     return g_line++;

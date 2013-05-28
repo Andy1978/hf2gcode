@@ -8,7 +8,7 @@
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
-  Foobar is distributed in the hope that it will be useful,
+  hf2gcode is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
@@ -37,7 +37,8 @@ int init_get_gcode_line (
              double feed,        /* Linear feed rate in mm/min */
              int precision,      /* Precision for floating points in generated g-code */
              char verbose,       /* Verbose description in generated G-Code */
-             char align);        /* Align lines l(eft) r(ight) c(enter) */
+             char align,         /* Align lines l(eft) r(ight) c(enter) */
+             char use_inch);     /* Use inch instead of mm as base unit */
 
 int get_gcode_line (
              char * buf,          /* buffer for g-code line output */
