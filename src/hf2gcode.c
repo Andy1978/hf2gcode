@@ -259,7 +259,7 @@ main (int argc, char **argv)
   if(arguments.read_stream)
   {
     FILE *f_in=NULL;
-    size_t cnt;
+    int cnt;
     if (!strcmp (arguments.input_file, "-"))
       f_in = stdin;
     else
@@ -346,7 +346,8 @@ main (int argc, char **argv)
       {
         fprintf(fn_gout, "%s\n",buf);
       }
-      printf("FINISHED\n");
+      if (!arguments.quiet)
+        printf("FINISHED\n");
       fclose(fn_gout);
     }
   }

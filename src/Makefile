@@ -2,9 +2,9 @@
 
 CFLAGS = -Wall -Wextra -O0 -ggdb
 
-run: hf2gcode
-	./hf2gcode "Hello world!" -o demo_hello_world.ngc -y 23
-	./hf2gcode "Hello world!" -o demo_hello_world_scriptc.ngc -y 23 --font=scriptc
+run: hf2gcode demo.txt
+	./hf2gcode -q -i demo.txt -o demo_hello_world.ngc -y 23
+	./hf2gcode -q -i demo.txt --font=scripts -o demo_hello_world_scripts.ngc -y 23
 
 hf2gcode: hf2gcode.c libhf2gcode.c
 	$(MAKE) -C ../hershey_fonts src
