@@ -175,10 +175,15 @@ int init_get_gcode_line (
   const char *p=text;
   while(*p)
   {
-    const char *tmp= get_glyph_ptr (_font,*p);
-    if (!tmp)
-      return -1;
-    p++;
+    /* do not check linefeed */
+    while(*p=='\n') p++;
+    if(*p)
+    {
+      const char *tmp= get_glyph_ptr (_font,*p);
+      if (!tmp)
+        return -1;
+      p++;
+    }
   }
   _init=1;
   return 0;
@@ -270,7 +275,7 @@ int get_gcode_line (
     return g_line++;
     case 5: snprintf(buf, buf_len, "G49%s",_verbose? " ( turns off tool length compensation )":"");
     return g_line++;
-    case 6: snprintf(buf, buf_len, "G94%s",_verbose? " ( Feed Rate Mode: Units per Minute Mode )":"");
+    case 6: snprintf(buf, buf_len, "G94%s",_verbose? " ( Feed Rate Mode: Units per minute Mode )":"");
     return g_line++;
     case 7: snprintf(buf, buf_len, "G17%s",_verbose? " ( X-Y plane )":"");
     return g_line++;
@@ -279,10 +284,18 @@ int get_gcode_line (
     case 9:
       if(_verbose)
       {
-        snprintf(buf, buf_len, "; text=\"%s\", font=\"%s\"",_text, _font);
+        /* make a copy and replace newline with | */
+        size_t len=strlen(_text);
+        char *tmp=malloc(len);
+        strcpy(tmp, _text);
+        size_t i;
+        for(i=0;i<len;++i) if(tmp[i]=='\n') tmp[i]='|';
+        snprintf(buf, buf_len, "; text=\"%s\", font=\"%s\"", tmp, _font);
+        free(tmp);
         return g_line++;
       }
-      else g_line++;
+      else 
+      g_line++;
     case 10:
       if(_verbose)
       {
@@ -320,12 +333,12 @@ int get_gcode_line (
     */
     if (c)
     {
-      if(c=='\\' && _text[char_index+1]=='n')
+      if(c=='\n')
       {
           x_glyph=0;
           y_glyph-=_yinc;
           snprintf(buf, buf_len, "( Linefeed )");
-          char_index+=2;
+          char_index++;
           return g_line++;
       }
       if(!current_glyph) /*load new glyph */

@@ -137,8 +137,6 @@ TODO / not yet implemented features
 
 *  Don't lift the pen if the start position of the next glyph is the same as the end position of the current. For example see a text which uses font "scripts".
 
-*  Allow read text from stdin. Perhaps an optional --text "hello!" or reading from file? - as stdin? So that "echo "huhu" |./hf2gcode" would work.
-
 Bugs
 ----
 Zarro Boogs Found

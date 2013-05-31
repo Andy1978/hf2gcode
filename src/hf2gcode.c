@@ -32,19 +32,20 @@ static char doc[] =
  "hf2gcode, a hershey font to g-code tracer";
 
 /* A description of the arguments we accept. */
-static char args_doc[] = "TEXT";
+static char args_doc[] = "[TEXT]";
 
 /* The options we understand. */
 static struct argp_option options[] = {
  {"font",         'h', "FONT",  0, "Use FONT instead of default font \"rowmans\"", 0},
- {"output",       'o', "FILE",  0, "Output to FILE instead of standard output", 0 },
+ {"output",       'o', "FILE",  0, "Output to FILE instead of stdout", 0 },
  {"scale",        's', "SCALE", 0, "Base unit/hershey font unit (default 0.5)", 0 },
+ {"input",        'i', "FILE", 0, "Read text from FILE instead of stdin", 0 },
  {0, 0, 0, 0, "G-code base settings:", 1 },
  {"feed",         'f', "FEED",  0, "Feed rate (default 200)", 1 },
  {"xoffset",      'x', "X0",    0, "X-Axis offset (default 0)", 1 },
  {"yoffset",      'y', "Y0",    0, "Y-Axis offset (default 0)", 1 },
- {"z-up",         'u', "ZUp",   0, "Pen-Up Z value (default 1)", 1 },
- {"z-down",       'd', "ZDown", 0, "Pen-Down Z value (default -1)", 1 },
+ {"z-up",         1000, "ZUp",   0, "PenUp Z value (default 1)", 1 },
+ {"z-down",       1001, "ZDown", 0, "PenDown Z value (default -1)", 1 },
  {0, 0, 0, 0, "Multiline settings:", 2 },
  {"interline",    'n', "YINC",  0, "Interline spacing in Y direction for multiple lines (default 15)", 2 },
  {"align-left",   'l', 0,       0, "Left align multiple lines (default)", 2},
@@ -53,7 +54,7 @@ static struct argp_option options[] = {
  {0, 0, 0, 0, "Miscellaneous:", 3 },
  {"min-gcode",    'm', 0,       0, "Generate minimalistic g-code, suppress comments", 3},
  {"precision",    'p', "PREC",  0, "Precision for G-Code generation (default 3)", 3},
- {"inch",         'i', 0,       0, "Use inch as base unit (default mm)", 3},
+ {"inch",         'u', 0,       0, "Use United States customary units (inch instead of mm) as base unit", 3},
  {"quiet",    'q', 0,      0,  "Don't produce any output", 3},
  { 0,0,0,0,0,0 }
 };
@@ -65,6 +66,7 @@ struct arguments
 {
  char *text;
  char *font;
+ char *input_file;
  char *output_file;
  double scale;
  double feed;
@@ -77,11 +79,43 @@ struct arguments
  enum eBaseUnit base;
  int min_gcode, quiet;
  int prec;
+ int read_stream;
 };
 
 const char* get_base_unit(struct arguments arg)
 {
   return (arg.base == mm)? "mm":"inch";
+}
+
+size_t read_text(char **t, FILE *stream)
+{
+#define BUFSIZE 100
+  size_t s=0;
+  *t=malloc(BUFSIZE);
+  if(!*t)
+  {
+    perror("ERROR in read_text, malloc failed: ");
+    exit(EXIT_FAILURE);
+  }
+  size_t cnt;
+  size_t sum=0;
+  do
+  {
+    cnt = fread(*t+s, 1, BUFSIZE, stream);
+    sum+=cnt;
+    if(cnt == BUFSIZE)  
+    { /*BUFSIZE too small to read all chars*/
+      s+=BUFSIZE;
+      *t=realloc(*t, s+BUFSIZE);
+      if(!*t)
+      {
+        perror("ERROR in read_text, realloc failed: ");
+        exit(EXIT_FAILURE);
+      }
+    }
+  }while(cnt == BUFSIZE);
+  *(*t+cnt)=0;
+  return sum;
 }
 
 /* Parse a single option. */
@@ -99,6 +133,9 @@ parse_opt (int key, char *arg, struct argp_state *state)
    {
    case 'h':
      arguments->font = arg;
+     break;
+   case 'i':
+     arguments->input_file = arg;
      break;
    case 'o':
      arguments->output_file = arg;
@@ -119,11 +156,11 @@ parse_opt (int key, char *arg, struct argp_state *state)
      arguments->yoffset = strtod(arg, &endptr);
      num_parse=1;
      break;
-   case 'u':
+   case 1000:
      arguments->z_up = strtod(arg, &endptr);
      num_parse=1;
      break;
-   case 'd':
+   case 1001:
      arguments->z_down = strtod(arg, &endptr);
      num_parse=1;
      break;
@@ -147,7 +184,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
      arguments->prec=strtol(arg, &endptr, 10);
      num_parse=1;
      break;
-   case 'i':
+   case 'u':
      arguments->base = inch;
      break;
    case 'q':
@@ -158,14 +195,13 @@ parse_opt (int key, char *arg, struct argp_state *state)
      if (state->arg_num >= 1)
        /* Too many arguments. */
        argp_usage (state);
-
-     arguments->text = arg;
-     break;
-
+       arguments->text = arg;
+       break;
    case ARGP_KEY_END:
      if (state->arg_num < 1)
-       /* Not enough arguments. */
-       argp_usage (state);
+       { /* No text, use stdin to read text. */
+         arguments->read_stream = 1;
+       }
      break;
 
    default:
@@ -200,6 +236,7 @@ main (int argc, char **argv)
 
   /* Default values. */
   arguments.font         = "rowmans";
+  arguments.input_file   = "-";
   arguments.output_file  = "-";
   arguments.scale        = 0.5;
   arguments.feed         = 200;
@@ -213,15 +250,43 @@ main (int argc, char **argv)
   arguments.min_gcode    = 0;
   arguments.quiet        = 0;
   arguments.prec         = 3;
+  arguments.read_stream  = 0;
 
   /* Parse our arguments; every option seen by parse_opt will
      be reflected in arguments. */
   argp_parse (&argp, argc, argv, 0, 0, &arguments);
 
+  if(arguments.read_stream)
+  {
+    FILE *f_in=NULL;
+    size_t cnt;
+    if (!strcmp (arguments.input_file, "-"))
+      f_in = stdin;
+    else
+      f_in = fopen(arguments.input_file, "r");
+    if (!f_in)
+      perror("main.c: Error opening input file:");
+    else
+      cnt=read_text(&arguments.text, f_in);
+    //printf("-------\n%s--------\n",arguments.text);
+    if (!arguments.quiet)
+      printf("INFO:read %d bytes from %s\n", cnt, arguments.input_file);
+  }
+
   /* Don't print stats if quiet*/
   if (!arguments.quiet)
   {
-    printf("Input Text         : %s\n", arguments.text);
+    printf("Text from stream   : %s\n", (arguments.read_stream)? "yes": "no");
+    //~ /* make a copy and replace newline with | */
+    //~ size_t len=strlen(arguments.text);
+    //~ char *tmp=malloc(len);
+    //~ strcpy(tmp, arguments.text);
+    //~ size_t i;
+    //~ for(i=0;i<len;++i) if(tmp[i]=='\n') tmp[i]='|';
+    //~ printf("Text               : %s\n", tmp);
+    //~ free(tmp);
+    if(!arguments.read_stream)
+      printf("Text               : %s\n", arguments.text);
     printf("Used hershey font  : %s\n", arguments.font);
     printf("G-code Output      : %s\n", arguments.output_file);
     printf("Base Unit          : %s\n", get_base_unit(arguments));
@@ -281,6 +346,7 @@ main (int argc, char **argv)
       {
         fprintf(fn_gout, "%s\n",buf);
       }
+      printf("FINISHED\n");
       fclose(fn_gout);
     }
   }
@@ -291,5 +357,7 @@ main (int argc, char **argv)
       printf("INFO: available fonts: rowmans, cursive, futural, futuram, gothgbt, gothgrt, gothiceng, gothicger, gothicita, gothitt, greekc, greek, greeks, rowmand, rowmant, scriptc, scripts, symbolic, timesg, timesib, timesi, timesrb, timesr\n");
     exit(EXIT_FAILURE);
   }
- exit (0);
+  if (arguments.read_stream)
+    free(arguments.text);
+  exit (0);
 }
