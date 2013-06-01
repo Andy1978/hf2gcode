@@ -46,54 +46,55 @@ Build
 
 Usage
 -----
-    ./hf2gcode --usage
-    Usage: hf2gcode [-cilmqr?V] [-d ZDown] [-f FEED] [-h FONT] [-n YINC] [-o FILE]
-                [-p PREC] [-s SCALE] [-u ZUp] [-x X0] [-y Y0] [--align-center]
-                [--z-down=ZDown] [--feed=FEED] [--font=FONT] [--inch]
-                [--align-left] [--min-gcode] [--interline=YINC] [--output=FILE]
-                [--precision=PREC] [--quiet] [--align-right] [--scale=SCALE]
-                [--z-up=ZUp] [--xoffset=X0] [--yoffset=Y0] [--help] [--usage]
-                [--version] TEXT
+      ./hf2gcode --usage
+      Usage: hf2gcode [-clrmqu?V] [-h FONT] [-i FILE] [-o FILE] [-s SCALE] [-f FEED]
+            [-x X0] [-y Y0] [-n YINC] [-p PREC] [--font=FONT] [--input=FILE]
+            [--output=FILE] [--scale=SCALE] [--feed=FEED] [--xoffset=X0]
+            [--yoffset=Y0] [--z-down=ZDown] [--z-up=ZUp] [--align-center]
+            [--align-left] [--interline=YINC] [--align-right] [--min-gcode]
+            [--precision=PREC] [--quiet] [--inch] [--help] [--usage]
+
 
 Help
 ----
-    ./hf2gcode --help
-    Usage: hf2gcode [OPTION...] TEXT
-    hf2gcode, a hershey font to g-code tracer
+      ./hf2gcode --help
+      Usage: hf2gcode [OPTION...] [TEXT]
+      hf2gcode, a hershey font to g-code tracer
 
-      -h, --font=FONT            Use FONT instead of default font "rowmans"
-      -o, --output=FILE          Output to FILE instead of standard output
-      -s, --scale=SCALE          Base unit/hershey font unit (default 0.5)
+        -h, --font=FONT            Use FONT instead of default font "rowmans"
+        -i, --input=FILE           Read text from FILE instead of stdin
+        -o, --output=FILE          Output to FILE instead of stdout
+        -s, --scale=SCALE          Base unit/hershey font unit (default 0.5)
 
-     G-code base settings:
-      -d, --z-down=ZDown         Pen-Down Z value (default -1)
-      -f, --feed=FEED            Feed rate (default 200)
-      -u, --z-up=ZUp             Pen-Up Z value (default 1)
-      -x, --xoffset=X0           X-Axis offset (default 0)
-      -y, --yoffset=Y0           Y-Axis offset (default 0)
+       G-code base settings:
+        -f, --feed=FEED            Feed rate (default 200)
+        -x, --xoffset=X0           X-Axis offset (default 0)
+        -y, --yoffset=Y0           Y-Axis offset (default 0)
+            --z-down=ZDown         PenDown Z value (default -1)
+            --z-up=ZUp             PenUp Z value (default 1)
 
-     Multiline settings:
-      -c, --align-center         Center multiple lines
-      -l, --align-left           Left align multiple lines (default)
-      -n, --interline=YINC       Interline spacing in Y direction for multiple
-                                 lines (default 15)
-      -r, --align-right          Right align multiple lines
+       Multiline settings:
+        -c, --align-center         Center multiple lines
+        -l, --align-left           Left align multiple lines (default)
+        -n, --interline=YINC       Interline spacing in Y direction for multiple
+                                   lines (default 15)
+        -r, --align-right          Right align multiple lines
 
-     Miscellaneous:
-      -i, --inch                 Use inch as base unit (default mm)
-      -m, --min-gcode            Generate minimalistic g-code, suppress comments
-      -p, --precision=PREC       Precision for G-Code generation (default 3)
-      -q, --quiet                Don't produce any output
+       Miscellaneous:
+        -m, --min-gcode            Generate minimalistic g-code, suppress comments
+        -p, --precision=PREC       Precision for G-Code generation (default 3)
+        -q, --quiet                Don't produce any output
+        -u, --inch                 Use United States customary units (inch instead of
+                                   mm) as base unit
 
-      -?, --help                 Give this help list
-          --usage                Give a short usage message
-      -V, --version              Print program version
+        -?, --help                 Give this help list
+            --usage                Give a short usage message
+        -V, --version              Print program version
 
-Example call of hf2gcode
-------------------------
-    ./hf2gcode "Hello world!\nThis is hf2gcode." -o demo_hello_world_scriptc.ngc -y 23 --font=scriptc
-    
-demo_hello_world_scriptc.ngc can then be loaded e.g. into LinuxCNC and looks like the image at the top of the README.
+      Mandatory or optional arguments to long options are also mandatory or optional
+      for any corresponding short options.
+
+      Report bugs to <andy.weber.aw@gmail.com>.
 
 Design and structure
 --------------------
