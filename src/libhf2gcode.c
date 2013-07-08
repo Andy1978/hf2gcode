@@ -239,6 +239,7 @@ int get_gcode_line (
   static char right_margin=0;
   static int footer_line=0;
 
+  buf[0]=0;
   if (_init==0)  /* not initialized */
   {
     *buf=0;
@@ -268,13 +269,13 @@ int get_gcode_line (
         snprintf(buf, buf_len, "G20%s",_verbose? " ( base unit inch )":"");
     return g_line++;
     case 2: snprintf(buf, buf_len, "G90%s",_verbose? " ( absolute distance mode )":"");
-    return g_line++;
-    case 3: snprintf(buf, buf_len, "G64%s",_verbose? " ( best possible speed )":"");
-    return g_line++;
-    case 4: snprintf(buf, buf_len, "G40%s",_verbose? " ( turn off tool diameter compensation )":"");
-    return g_line++;
-    case 5: snprintf(buf, buf_len, "G49%s",_verbose? " ( turns off tool length compensation )":"");
-    return g_line++;
+    return g_line+=4;
+    //grbl reports "Unsupported statement" for G64
+    //case 3: snprintf(buf, buf_len, "G64%s",_verbose? " ( best possible speed )":"");
+    //grbl reports "Unsupported statement" for G40
+    //case 4: snprintf(buf, buf_len, "G40%s",_verbose? " ( turn off tool diameter compensation )":"");
+    //grbl reports "Unsupported statement" for G49
+    //case 5: snprintf(buf, buf_len, "G49%s",_verbose? " ( turns off tool length compensation )":"");
     case 6: snprintf(buf, buf_len, "G94%s",_verbose? " ( Feed Rate Mode: Units per minute Mode )":"");
     return g_line++;
     case 7: snprintf(buf, buf_len, "G17%s",_verbose? " ( X-Y plane )":"");
@@ -358,8 +359,9 @@ int get_gcode_line (
 
         if (_verbose)
           snprintf(buf, buf_len, ";%c = %s",c, glyph_ptr);
-        else
-          snprintf(buf, buf_len, ";%c",c);
+        //grbl hast problems with ;x comments and shows error "expected command letter"
+        //else
+        //  snprintf(buf, buf_len, ";%c",c);
         return g_line++;
       }
       else if(!(*glyph_ptr)) /*end of glyph*/
