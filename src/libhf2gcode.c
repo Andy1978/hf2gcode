@@ -24,6 +24,8 @@
 #endif
 
 #include "../hershey_fonts/gen_c_src/rowmans.h"
+#include "../hershey_fonts/gen_c_src/scripts.h"
+
 #ifndef AVR
   #include "../hershey_fonts/gen_c_src/cursive.h"
   #include "../hershey_fonts/gen_c_src/futural.h"
@@ -40,7 +42,6 @@
   #include "../hershey_fonts/gen_c_src/rowmand.h"
   #include "../hershey_fonts/gen_c_src/rowmant.h"
   #include "../hershey_fonts/gen_c_src/scriptc.h"
-  #include "../hershey_fonts/gen_c_src/scripts.h"
   #include "../hershey_fonts/gen_c_src/symbolic.h"
   #include "../hershey_fonts/gen_c_src/timesg.h"
   #include "../hershey_fonts/gen_c_src/timesib.h"
@@ -87,6 +88,7 @@ const char * get_glyph_ptr (const char *font,
   int index = 0;
 
   FONT_TABLE(rowmans)
+  else FONT_TABLE(scripts)
 #ifndef AVR
   else FONT_TABLE(cursive)
   else FONT_TABLE(futural)
@@ -103,7 +105,6 @@ const char * get_glyph_ptr (const char *font,
   else FONT_TABLE(rowmand)
   else FONT_TABLE(rowmant)
   else FONT_TABLE(scriptc)
-  else FONT_TABLE(scripts)
   else FONT_TABLE(symbolic)
   else FONT_TABLE(timesg)
   else FONT_TABLE(timesib)
@@ -260,7 +261,7 @@ int get_gcode_line (
   }
   switch(g_line)
   {
-    case 0: snprintf(buf, buf_len, "( generated with %s )",argp_program_version);
+    case 0: snprintf(buf, buf_len, _verbose? "( generated with %s )":"", argp_program_version);
     return g_line++;
     case 1: 
       if(!_use_inch)
@@ -441,6 +442,9 @@ int get_gcode_line (
       case 0: snprintf(buf, buf_len, "M5 %s",_verbose? "(stop the spindle)":"");
       return g_line++;
       case 1: snprintf(buf, buf_len, "M30 %s",_verbose? "(Program stop, rewind to beginning of program)":"");
+#ifdef AVR
+      buf[0]=0;   //No M30 on AVR
+#endif
       return g_line++;
       default:
         break;
