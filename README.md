@@ -36,6 +36,7 @@ Overview on http://www.tech-chat.de/png_album/
 Dependencies
 ------------
 *  gcc, the GNU Compiler Collection, libc
+*  [GNU argp](http://www.gnu.org/software/libc/manual/html_node/Argp.html)
 *  (OPTIONAL) GNU Octave if you want to generate the hershey font overview pngs and svgs or to generated the hershey_font C declarations.
 *  (OPTIONAL) photon if you want to generate a static HTML page with rendered fonts like http://www.tech-chat.de/png_album/
 
@@ -105,9 +106,9 @@ Design and structure
 *  src/libhf2gcode.c and .h: Actual type setting/tracing
 *  src/hf2gcode.c: A command line interface program to call libhf2gcode
 
-The libhf2gcode should also be compilable with avr-gcc and run on an AVR Atmega32. Only font "rowmans" is available if
-the MACRO AVR is set. The [Needler project](https://github.com/Andy1978/needler) will read input from a PS2 keyboard,
-generate the g-code with libhf2gcode and send the generated g-code to [grbl](https://github.com/grbl/grbl)
+The libhf2gcode should also be compilable with avr-gcc and run on an AVR Atmega32. Only font "rowmans" and "scripts" are available if
+the MACRO AVR is set. The [Needler project](https://github.com/Andy1978/needler) reads user input from 8x8 matrix keyboard,
+generates the g-code with libhf2gcode and sends the generated g-code to [grbl](https://github.com/grbl/grbl)
 which controlls the stepper for the CNC mill.
 
 Testing the generated output
@@ -138,6 +139,8 @@ TODO / not yet implemented features
 
 *  Don't lift the pen if the start position of the next glyph is the same as the end position of the current. For example see a text which uses font "scripts".
 
+*  German "Umlaute" äöüß weren't implemented yet.
+
 Bugs
 ----
 Zarro Boogs Found
@@ -152,6 +155,3 @@ Unsorted Links
 *  http://www.ghostscript.com/doc/current/Hershey.htm
 *  http://emergent.unpythonic.net/software/hershey (Download of the fonts and description)
 *  http://www.linuxcnc.org/docs/html/gcode.html
-*  http://www.timeguy.com/cradek/truetype (A TrueType tracer with DXF and G-Code output)
-*  http://wiki.linuxcnc.org/cgi-bin/wiki.pl?Simple_LinuxCNC_G-Code_Generators#Text_Engraving_Software
-*  http://www.evilmadscientist.com/2011/hershey-text-an-inkscape-extension-for-engraving-fonts/ (Inkscape extension)
