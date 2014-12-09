@@ -48,12 +48,13 @@ Build
 Usage
 -----
       ./hf2gcode --usage
-      Usage: hf2gcode [-clrmqu?V] [-h FONT] [-i FILE] [-o FILE] [-s SCALE] [-f FEED]
+      Usage: hf2gcode [-aclrmqu?V] [-h FONT] [-i FILE] [-o FILE] [-s SCALE] [-f FEED]
             [-x X0] [-y Y0] [-n YINC] [-p PREC] [--font=FONT] [--input=FILE]
             [--output=FILE] [--scale=SCALE] [--feed=FEED] [--xoffset=X0]
             [--yoffset=Y0] [--z-down=ZDown] [--z-up=ZUp] [--align-center]
             [--align-left] [--interline=YINC] [--align-right] [--min-gcode]
-            [--precision=PREC] [--quiet] [--inch] [--help] [--usage]
+            [--precision=PREC] [--quiet] [--inch] [--append] [--no-post]
+						[--no-pre] [--help] [--usage]
 
 
 Help
@@ -65,6 +66,7 @@ Help
         -h, --font=FONT            Use FONT instead of default font "rowmans"
         -i, --input=FILE           Read text from FILE instead of stdin
         -o, --output=FILE          Output to FILE instead of stdout
+				-a, --append               Append to file, don't overwrite (implies --no-pre)
         -s, --scale=SCALE          Base unit/hershey font unit (default 0.5)
 
        G-code base settings:
@@ -84,7 +86,9 @@ Help
        Miscellaneous:
         -m, --min-gcode            Generate minimalistic g-code, suppress comments
         -p, --precision=PREC       Precision for G-Code generation (default 3)
-        -q, --quiet                Don't produce any output
+        -q, --quiet                Don't produce any output to stdout
+				    --no-pre               Don't write preamble / setup
+						--no-post              Don't write postamble
         -u, --inch                 Use United States customary units (inch instead of
                                    mm) as base unit
 
