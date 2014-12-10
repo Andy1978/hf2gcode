@@ -38,7 +38,9 @@ int init_get_gcode_line (
              int precision,      /* Precision for floating points in generated g-code */
              char verbose,       /* Verbose description in generated G-Code */
              char align,         /* Align lines l(eft) r(ight) c(enter) */
-             char use_inch);     /* Use inch instead of mm as base unit */
+             char use_inch,      /* Use inch instead of mm as base unit */
+						 char no_pre,        /* Don't write preamble */
+						 char no_post);      /* Don't write postamble */
 
 int get_gcode_line (
              char * buf,          /* buffer for g-code line output */

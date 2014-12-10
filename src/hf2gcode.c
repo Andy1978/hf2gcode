@@ -40,6 +40,7 @@ static struct argp_option options[] = {
  {"output",       'o', "FILE",  0, "Output to FILE instead of stdout", 0 },
  {"scale",        's', "SCALE", 0, "Base unit/hershey font unit (default 0.5)", 0 },
  {"input",        'i', "FILE", 0, "Read text from FILE instead of stdin", 0 },
+ {"append",				'a', 0,				0,	"Append to output file instead of overwriting", 0},
  {0, 0, 0, 0, "G-code base settings:", 1 },
  {"feed",         'f', "FEED",  0, "Feed rate (default 200)", 1 },
  {"xoffset",      'x', "X0",    0, "X-Axis offset (default 0)", 1 },
@@ -55,7 +56,9 @@ static struct argp_option options[] = {
  {"min-gcode",    'm', 0,       0, "Generate minimalistic g-code, suppress comments", 3},
  {"precision",    'p', "PREC",  0, "Precision for G-Code generation (default 3)", 3},
  {"inch",         'u', 0,       0, "Use United States customary units (inch instead of mm) as base unit", 3},
- {"quiet",    'q', 0,      0,  "Don't produce any output", 3},
+ {"quiet",    		'q', 0,      	0, "Don't produce any output to stdout", 3},
+ {"no-pre",				1002, 0,				0, "Don't include preamble", 3},
+ {"no-post",			1003, 0,				0, "Don't include postamble", 3},
  { 0,0,0,0,0,0 }
 };
 
@@ -77,7 +80,7 @@ struct arguments
  double y_interline;
  enum eAlign align;
  enum eBaseUnit base;
- int min_gcode, quiet;
+ int min_gcode, quiet, append, no_pre, no_post;
  int prec;
  int read_stream;
 };
@@ -190,6 +193,16 @@ parse_opt (int key, char *arg, struct argp_state *state)
    case 'q':
      arguments->quiet = 1;
      break;
+   case 'a':
+		 arguments->append = 1;
+		 arguments->no_pre = 1;
+		 break;
+   case 1002: 
+		 arguments->no_pre = 1;
+		 break;
+   case 1003:
+		 arguments->no_post = 1;
+		 break;
 
    case ARGP_KEY_ARG:
      if (state->arg_num >= 1)
@@ -249,6 +262,9 @@ main (int argc, char **argv)
   arguments.base         = mm;
   arguments.min_gcode    = 0;
   arguments.quiet        = 0;
+	arguments.no_pre       = 0;
+	arguments.no_post      = 0;
+	arguments.append       = 0;
   arguments.prec         = 3;
   arguments.read_stream  = 0;
 
@@ -327,7 +343,9 @@ main (int argc, char **argv)
                                  arguments.prec,
                                  !arguments.min_gcode,
                                  'l',
-                                 arguments.base == inch);
+                                 arguments.base == inch,
+																 arguments.no_pre,
+																 arguments.no_post);
 
   if (!init_ret)  /* init successful */
   {
@@ -335,7 +353,7 @@ main (int argc, char **argv)
     if (!strcmp (arguments.output_file, "-"))
       fn_gout = stdout;
     else
-      fn_gout = fopen(arguments.output_file, "w");
+      fn_gout = fopen(arguments.output_file, (arguments.append?"a":"w"));
     if (!fn_gout)
       perror("main.c: Creation of output file failed:");
     else

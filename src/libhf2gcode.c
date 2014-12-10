@@ -77,6 +77,8 @@ static char _align;
 static char _use_inch;
 static char _init;
 static int _yinc;
+static char _no_pre;
+static char _no_post;
 static double _X, _Y, _Z;
 
 /* get pointer to start of the glyph or NULL if not available */
@@ -152,7 +154,9 @@ int init_get_gcode_line (
              int precision,      /* Precision for floating points in generated g-code */
              char verbose,       /* Verbose description in generated G-Code */
              char align,         /* Align lines l(eft) r(ight) c(enter) */
-             char use_inch)      /* Use inch instead of mm as base unit */
+             char use_inch,      /* Use inch instead of mm as base unit */
+						 char no_pre,        /* Don't write header, output only movement */
+						 char no_post)       /* Don't write tail */
 {
   _font=font;
   _text=text;
@@ -164,6 +168,8 @@ int init_get_gcode_line (
   _feed=feed;
   _precision=precision;
   _verbose=verbose;
+	_no_pre=no_pre;
+	_no_post=no_post;
   _align=align;
   _use_inch=use_inch;
   _yinc=yinc;
@@ -258,71 +264,77 @@ int get_gcode_line (
     right_margin= 0;
     footer_line = 0;
     _init       = 2;
-  }
-  switch(g_line)
-  {
-    case 0: snprintf(buf, buf_len, _verbose? "( generated with %s )":"", argp_program_version);
-    return g_line++;
-    case 1: 
-      if(!_use_inch)
-        snprintf(buf, buf_len, "G21%s",_verbose? " ( base unit mm )":"");
-      else
-        snprintf(buf, buf_len, "G20%s",_verbose? " ( base unit inch )":"");
-    return g_line++;
-    case 2: snprintf(buf, buf_len, "G90%s",_verbose? " ( absolute distance mode )":"");
-    return g_line+=4;
-    //grbl reports "Unsupported statement" for G64
-    //case 3: snprintf(buf, buf_len, "G64%s",_verbose? " ( best possible speed )":"");
-    //grbl reports "Unsupported statement" for G40
-    //case 4: snprintf(buf, buf_len, "G40%s",_verbose? " ( turn off tool diameter compensation )":"");
-    //grbl reports "Unsupported statement" for G49
-    //case 5: snprintf(buf, buf_len, "G49%s",_verbose? " ( turns off tool length compensation )":"");
-    case 6: snprintf(buf, buf_len, "G94%s",_verbose? " ( Feed Rate Mode: Units per minute Mode )":"");
-    return g_line++;
-    case 7: snprintf(buf, buf_len, "G17%s",_verbose? " ( X-Y plane )":"");
-    return g_line++;
-    case 8: snprintf(buf, buf_len, "M3 S10000");
-    return g_line++;
-    case 9:
-      if(_verbose)
-      {
-        /* make a copy and replace newline with | */
-        size_t len=strlen(_text);
-        char *tmp=malloc(len);
-        strcpy(tmp, _text);
-        size_t i;
-        for(i=0;i<len;++i) if(tmp[i]=='\n') tmp[i]='|';
-        snprintf(buf, buf_len, "; text=\"%s\", font=\"%s\"", tmp, _font);
-        free(tmp);
-        return g_line++;
-      }
-      else 
-      g_line++;
-    case 10:
-      if(_verbose)
-      {
-        snprintf(buf, buf_len, "( scale=%f, feed=%f, precision=%d )",_scale, _feed, _precision);
-        return g_line++;
-      }
-      else g_line++;
-    case 11:
+  } 
+
+	if (_no_pre&&(12>=g_line)) {
+		if (2==g_line) return g_line+=4;
+		else 					 return g_line++;
+	} else {
+  	switch(g_line)
+	  {
+	    case 0: snprintf(buf, buf_len, _verbose? "( generated with %s )":"", argp_program_version);
+	    return g_line++;
+	    case 1: 
+	      if(!_use_inch)
+	        snprintf(buf, buf_len, "G21%s",_verbose? " ( base unit mm )":"");
+	      else
+	        snprintf(buf, buf_len, "G20%s",_verbose? " ( base unit inch )":"");
+	    return g_line++;
+	    case 2: snprintf(buf, buf_len, "G90%s",_verbose? " ( absolute distance mode )":"");
+	    return g_line+=4;
+	    //grbl reports "Unsupported statement" for G64
+	    //case 3: snprintf(buf, buf_len, "G64%s",_verbose? " ( best possible speed )":"");
+	    //grbl reports "Unsupported statement" for G40
+	    //case 4: snprintf(buf, buf_len, "G40%s",_verbose? " ( turn off tool diameter compensation )":"");
+	    //grbl reports "Unsupported statement" for G49
+	    //case 5: snprintf(buf, buf_len, "G49%s",_verbose? " ( turns off tool length compensation )":"");
+	    case 6: snprintf(buf, buf_len, "G94%s",_verbose? " ( Feed Rate Mode: Units per minute Mode )":"");
+	    return g_line++;
+	    case 7: snprintf(buf, buf_len, "G17%s",_verbose? " ( X-Y plane )":"");
+	    return g_line++;
+	    case 8: snprintf(buf, buf_len, "M3 S10000");
+	    return g_line++;
+	    case 9:
+	      if(_verbose)
+	      {
+	        /* make a copy and replace newline with | */
+	        size_t len=strlen(_text);
+	        char *tmp=malloc(len);
+	        strcpy(tmp, _text);
+	        size_t i;
+	        for(i=0;i<len;++i) if(tmp[i]=='\n') tmp[i]='|';
+	        snprintf(buf, buf_len, "; text=\"%s\", font=\"%s\"", tmp, _font);
+	        free(tmp);
+	        return g_line++;
+	      }
+	      else 
+	      g_line++;
+	    case 10:
+	      if(_verbose)
+	      {
+	        snprintf(buf, buf_len, "( scale=%f, feed=%f, precision=%d )",_scale, _feed, _precision);
+	        return g_line++;
+	      }
+	      else g_line++;
+	    case 11:
 #ifndef FIXED_PRECISION
-      snprintf(buf, buf_len, "F%.*f", _precision, _feed);
+	      snprintf(buf, buf_len, "F%.*f", _precision, _feed);
 #else
-      snprintf(buf, buf_len, "F%.2f", _feed);
+  	    snprintf(buf, buf_len, "F%.2f", _feed);
 #endif
-      return g_line++;
-    case 12:
+	      return g_line++;
+	    case 12:
 #ifndef FIXED_PRECISION
-      snprintf(buf, buf_len, "G0 Z%.*f%s", _precision, _Z_up, _verbose? " ( Pen-Up at start)":"");
+	      snprintf(buf, buf_len, "G0 Z%.*f%s", _precision, _Z_up, _verbose? " ( Pen-Up at start)":"");
 #else
-      snprintf(buf, buf_len, "G0 Z%.2f%s", _Z_up, _verbose? " ( Pen-Up at start)":"");
+	      snprintf(buf, buf_len, "G0 Z%.2f%s", _Z_up, _verbose? " ( Pen-Up at start)":"");
 #endif
-      _Z = _Z_up;
-      return g_line++;
-    default:
-      break;
-  }
+	      _Z = _Z_up;
+	      return g_line++;
+	    default:
+	      break;
+	  }
+	}
 
   if(g_line>12)
   {
@@ -437,18 +449,20 @@ int get_gcode_line (
     }
 
     /*end of text*/
-    switch (footer_line++)
-    {
-      case 0: snprintf(buf, buf_len, "M5 %s",_verbose? "(stop the spindle)":"");
-      return g_line++;
-      case 1: snprintf(buf, buf_len, "M30 %s",_verbose? "(Program stop, rewind to beginning of program)":"");
+		if (!_no_post) {
+	    switch (footer_line++)
+	    {
+	      case 0: snprintf(buf, buf_len, "M5 %s",_verbose? "(stop the spindle)":"");
+	      return g_line++;
+	      case 1: snprintf(buf, buf_len, "M30 %s",_verbose? "(Program stop, rewind to beginning of program)":"");
 #ifdef AVR
-      buf[0]=0;   //No M30 on AVR
+	      buf[0]=0;   //No M30 on AVR
 #endif
-      return g_line++;
-      default:
-        break;
-    }
-  }
+	      return g_line++;
+	      default:
+	        break;
+	    }
+	  }
+	}
   return -1;
 }
