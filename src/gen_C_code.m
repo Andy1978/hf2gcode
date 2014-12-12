@@ -1,4 +1,4 @@
-## Copyright (C) 2013 Andreas Weber <andy.weber.aw@gmail.com>
+## Copyright (C) 2014 Andreas Weber <andy.weber.aw@gmail.com>
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 ## @end deftypefn
 
 function gen_C_code(fn, fn_out)
-  [DIR, NAME, EXT, VER] = fileparts (fn);
+  [DIR, NAME] = fileparts (fn);
 
   hf = load_hf (fn);
   [fid, MSG] = fopen(fn_out,"w");
