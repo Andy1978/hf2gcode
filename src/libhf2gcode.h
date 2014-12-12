@@ -1,5 +1,5 @@
 /*
-  Copyright(C) 2013 Andreas Weber <andy.weber.aw@gmail.com>
+  Copyright(C) 2014 Andreas Weber <andy.weber.aw@gmail.com>
 
   This file is part of hf2gcode.
 
@@ -39,8 +39,8 @@ int init_get_gcode_line (
              char verbose,       /* Verbose description in generated G-Code */
              char align,         /* Align lines l(eft) r(ight) c(enter) */
              char use_inch,      /* Use inch instead of mm as base unit */
-						 char no_pre,        /* Don't write preamble */
-						 char no_post);      /* Don't write postamble */
+             char no_pre,        /* Don't write preamble */
+             char no_post);      /* Don't write postamble */
 
 int get_gcode_line (
              char * buf,          /* buffer for g-code line output */
