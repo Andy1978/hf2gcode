@@ -120,7 +120,7 @@ size_t read_text(char **t, FILE *stream)
         }
     }
   while(cnt == BUFSIZE);
-  *(*t+cnt)=0;
+  *(*t+sum)=0;
   return sum;
 }
 
