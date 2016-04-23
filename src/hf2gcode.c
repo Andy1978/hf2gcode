@@ -93,7 +93,7 @@ const char* get_base_unit(struct arguments arg)
 
 size_t read_text(char **t, FILE *stream)
 {
-#define BUFSIZE 100
+#define BUFSIZE (1004*10)
   size_t s=0;
   *t=malloc(BUFSIZE);
   if(!*t)
@@ -290,13 +290,13 @@ main (int argc, char **argv)
         cnt=read_text(&arguments.text, f_in);
       //printf("-------\n%s--------\n",arguments.text);
       if (!arguments.quiet)
-        printf("INFO:read %d bytes from %s\n", cnt, arguments.input_file);
+          fprintf(stderr, "INFO:read %d bytes from %s\n", cnt, arguments.input_file);
     }
 
   /* Don't print stats if quiet*/
   if (!arguments.quiet)
     {
-      printf("Text from stream   : %s\n", (arguments.read_stream)? "yes": "no");
+      fprintf(stderr, "Text from stream   : %s\n", (arguments.read_stream)? "yes": "no");
       //~ /* make a copy and replace newline with | */
       //~ size_t len=strlen(arguments.text);
       //~ char *tmp=malloc(len);
@@ -306,20 +306,20 @@ main (int argc, char **argv)
       //~ printf("Text               : %s\n", tmp);
       //~ free(tmp);
       if(!arguments.read_stream)
-        printf("Text               : %s\n", arguments.text);
-      printf("Used hershey font  : %s\n", arguments.font);
-      printf("G-code Output      : %s\n", arguments.output_file);
-      printf("Base Unit          : %s\n", get_base_unit(arguments));
-      printf("Scale              : %f\n", arguments.scale);
-      printf("Feed rate          : %f %s/min\n", arguments.feed, get_base_unit(arguments));
-      printf("X-Axis offset      : %f %s\n", arguments.xoffset, get_base_unit(arguments));
-      printf("Y-Axis offset      : %f %s\n", arguments.yoffset, get_base_unit(arguments));
-      printf("Pen-Up   Z value   : %f %s\n", arguments.z_up, get_base_unit(arguments));
-      printf("Pen-Down Z value   : %f %s\n", arguments.z_down, get_base_unit(arguments));
-      printf("Y interline        : %f %s\n", arguments.y_interline, get_base_unit(arguments));
-      printf("Multiline align    : %s\n", (arguments.align == left)? "left": ((arguments.align == right)? "right" : "center"));
-      printf("Minimalistic gcode : %s\n", (arguments.min_gcode)? "yes": "no");
-      printf("Precision          : %d\n", arguments.prec);
+          fprintf(stderr, "Text               : %s\n", arguments.text);
+      fprintf(stderr, "Used hershey font  : %s\n", arguments.font);
+      fprintf(stderr, "G-code Output      : %s\n", arguments.output_file);
+      fprintf(stderr, "Base Unit          : %s\n", get_base_unit(arguments));
+      fprintf(stderr, "Scale              : %f\n", arguments.scale);
+      fprintf(stderr, "Feed rate          : %f %s/min\n", arguments.feed, get_base_unit(arguments));
+      fprintf(stderr, "X-Axis offset      : %f %s\n", arguments.xoffset, get_base_unit(arguments));
+      fprintf(stderr, "Y-Axis offset      : %f %s\n", arguments.yoffset, get_base_unit(arguments));
+      fprintf(stderr, "Pen-Up   Z value   : %f %s\n", arguments.z_up, get_base_unit(arguments));
+      fprintf(stderr, "Pen-Down Z value   : %f %s\n", arguments.z_down, get_base_unit(arguments));
+      fprintf(stderr, "Y interline        : %f %s\n", arguments.y_interline, get_base_unit(arguments));
+      fprintf(stderr, "Multiline align    : %s\n", (arguments.align == left)? "left": ((arguments.align == right)? "right" : "center"));
+      fprintf(stderr, "Minimalistic gcode : %s\n", (arguments.min_gcode)? "yes": "no");
+      fprintf(stderr, "Precision          : %d\n", arguments.prec);
     }
 
   /* check not implemented params */
@@ -369,7 +369,7 @@ main (int argc, char **argv)
               fprintf(fn_gout, "%s\n",buf);
             }
           if (!arguments.quiet)
-            printf("FINISHED\n");
+              fprintf(stderr, "FINISHED\n");
           fclose(fn_gout);
         }
     }
