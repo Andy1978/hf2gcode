@@ -304,11 +304,11 @@ int get_gcode_line (
         {
           /* make a copy and replace newline with | */
           size_t len=strlen(_text);
-          char *tmp=malloc(len);
+          char *tmp=malloc(len+1);
           strcpy(tmp, _text);
           size_t i;
           for(i=0;i<len;++i) if(tmp[i]=='\n') tmp[i]='|';
-          snprintf(buf, buf_len, "; text=\"%s\", font=\"%s\"", tmp, _font);
+          snprintf(buf, buf_len, "( text=\"%s\", font=\"%s\" )", tmp, _font);
           free(tmp);
           return g_line++;
         }
