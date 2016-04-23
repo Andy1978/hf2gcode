@@ -57,7 +57,7 @@ static struct argp_option options[] =
   {"min-gcode",    'm', 0,        0, "Generate minimalistic g-code, suppress comments", 3},
   {"precision",    'p', "PREC",   0, "Precision for G-Code generation (default 3)", 3},
   {"inch",         'u', 0,        0, "Use United States customary units (inch instead of mm) as base unit", 3},
-  {"quiet",        'q', 0,        0, "Don't produce any output to stdout", 3},
+  {"verbose",      'v', 0,        0, "Increase verbosity", 3},
   {"no-pre",       1002, 0,       0, "Don't include preamble", 3},
   {"no-post",      1003, 0,       0, "Don't include postamble", 3},
   { 0,0,0,0,0,0 }
@@ -81,7 +81,7 @@ struct arguments
   double y_interline;
   enum eAlign align;
   enum eBaseUnit base;
-  int min_gcode, quiet, append, no_pre, no_post;
+  int min_gcode, verbose, append, no_pre, no_post;
   int prec;
   int read_stream;
 };
@@ -193,8 +193,8 @@ parse_opt (int key, char *arg, struct argp_state *state)
     case 'u':
       arguments->base = inch;
       break;
-    case 'q':
-      arguments->quiet = 1;
+    case 'v':
+      arguments->verbose = 1;
       break;
     case 'a':
       arguments->append = 1;
@@ -238,7 +238,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
           exit(EXIT_FAILURE);
         }
       if (*endptr != '\0')
-        printf("WARNING in parse_opt: Further characters after number: %s\n", endptr);
+        printf("( WARNING in parse_opt: Further characters after number: %s )\n", endptr);
     }
   return 0;
 }
@@ -265,7 +265,7 @@ main (int argc, char **argv)
   arguments.align        = left;
   arguments.base         = mm;
   arguments.min_gcode    = 0;
-  arguments.quiet        = 0;
+  arguments.verbose      = 0;
   arguments.no_pre       = 0;
   arguments.no_post      = 0;
   arguments.append       = 0;
@@ -288,38 +288,27 @@ main (int argc, char **argv)
         perror("main.c: Error opening input file:");
       else
         cnt=read_text(&arguments.text, f_in);
-      //printf("-------\n%s--------\n",arguments.text);
-      if (!arguments.quiet)
-        printf("INFO:read %d bytes from %s\n", cnt, arguments.input_file);
+      if (arguments.verbose)
+        printf("( INFO:read %d bytes from %s)\n", cnt, arguments.input_file);
     }
 
-  /* Don't print stats if quiet*/
-  if (!arguments.quiet)
+  if (arguments.verbose)
     {
-      printf("Text from stream   : %s\n", (arguments.read_stream)? "yes": "no");
-      //~ /* make a copy and replace newline with | */
-      //~ size_t len=strlen(arguments.text);
-      //~ char *tmp=malloc(len);
-      //~ strcpy(tmp, arguments.text);
-      //~ size_t i;
-      //~ for(i=0;i<len;++i) if(tmp[i]=='\n') tmp[i]='|';
-      //~ printf("Text               : %s\n", tmp);
-      //~ free(tmp);
       if(!arguments.read_stream)
-        printf("Text               : %s\n", arguments.text);
-      printf("Used hershey font  : %s\n", arguments.font);
-      printf("G-code Output      : %s\n", arguments.output_file);
-      printf("Base Unit          : %s\n", get_base_unit(arguments));
-      printf("Scale              : %f\n", arguments.scale);
-      printf("Feed rate          : %f %s/min\n", arguments.feed, get_base_unit(arguments));
-      printf("X-Axis offset      : %f %s\n", arguments.xoffset, get_base_unit(arguments));
-      printf("Y-Axis offset      : %f %s\n", arguments.yoffset, get_base_unit(arguments));
-      printf("Pen-Up   Z value   : %f %s\n", arguments.z_up, get_base_unit(arguments));
-      printf("Pen-Down Z value   : %f %s\n", arguments.z_down, get_base_unit(arguments));
-      printf("Y interline        : %f %s\n", arguments.y_interline, get_base_unit(arguments));
-      printf("Multiline align    : %s\n", (arguments.align == left)? "left": ((arguments.align == right)? "right" : "center"));
-      printf("Minimalistic gcode : %s\n", (arguments.min_gcode)? "yes": "no");
-      printf("Precision          : %d\n", arguments.prec);
+        printf("( Text               : %s )\n", arguments.text);
+      printf("( Used hershey font  : %s )\n", arguments.font);
+      printf("( G-code Output      : %s )\n", arguments.output_file);
+      printf("( Base Unit          : %s )\n", get_base_unit(arguments));
+      printf("( Scale              : %f )\n", arguments.scale);
+      printf("( Feed rate          : %f %s/min )\n", arguments.feed, get_base_unit(arguments));
+      printf("( X-Axis offset      : %f %s )\n", arguments.xoffset, get_base_unit(arguments));
+      printf("( Y-Axis offset      : %f %s )\n", arguments.yoffset, get_base_unit(arguments));
+      printf("( Pen-Up   Z value   : %f %s )\n", arguments.z_up, get_base_unit(arguments));
+      printf("( Pen-Down Z value   : %f %s )\n", arguments.z_down, get_base_unit(arguments));
+      printf("( Y interline        : %f %s )\n", arguments.y_interline, get_base_unit(arguments));
+      printf("( Multiline align    : %s )\n", (arguments.align == left)? "left": ((arguments.align == right)? "right" : "center"));
+      printf("( Minimalistic gcode : %s )\n", (arguments.min_gcode)? "yes": "no");
+      printf("( Precision          : %d )\n", arguments.prec);
     }
 
   /* check not implemented params */
@@ -368,16 +357,15 @@ main (int argc, char **argv)
             {
               fprintf(fn_gout, "%s\n",buf);
             }
-          if (!arguments.quiet)
-            printf("FINISHED\n");
+          if (arguments.verbose)
+            printf("( FINISHED )\n");
           fclose(fn_gout);
         }
     }
   else /*init failed*/
     {
       fprintf(stderr, "ERROR: Initialisation of g-code generator failed. Your text may contain some characters which are not available in the selected font.\n");
-      if(!arguments.quiet)
-        printf("INFO: available fonts: rowmans, cursive, futural, futuram, gothgbt, gothgrt, gothiceng, gothicger, gothicita, gothitt, greekc, greek, greeks, rowmand, rowmant, scriptc, scripts, symbolic, timesg, timesib, timesi, timesrb, timesr\n");
+      fprintf(stderr, "INFO: available fonts: rowmans, cursive, futural, futuram, gothgbt, gothgrt, gothiceng, gothicger, gothicita, gothitt, greekc, greek, greeks, rowmand, rowmant, scriptc, scripts, symbolic, timesg, timesib, timesi, timesrb, timesr\n");
       exit(EXIT_FAILURE);
     }
   if (arguments.read_stream)
