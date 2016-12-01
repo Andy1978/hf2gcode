@@ -354,7 +354,7 @@ int get_gcode_line (
     {
       if(c=='\n')
       {
-          x_glyph=0;
+          x_glyph=_X0;
           y_glyph-=_yinc;
           snprintf(buf, buf_len, "( Linefeed )");
           char_index++;
