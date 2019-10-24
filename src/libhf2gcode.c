@@ -55,11 +55,12 @@
     ptr   = x;     \
     index = c-32;} /*for ASCII fonts, will not work with e.g. japanese*/
 
-const char *argp_program_version = "hf2gcode 0.2.1";
+const char *argp_program_version = "hf2gcode 0.2.2";
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 #include "libhf2gcode.h"
 
 /* g-code generator init parameter */
@@ -242,8 +243,8 @@ int get_gcode_line (
   static enum ePenState {Up=0, Down} pen_state;
   static char pen_above_pos=0;
   static int g_line=0;
-  static char left_margin=0;
-  static char right_margin=0;
+  static int8_t left_margin=0;
+  static int8_t right_margin=0;
   static int footer_line=0;
 
   buf[0]=0;
@@ -400,8 +401,8 @@ int get_gcode_line (
         pen_state=Up;
         return g_line++;
       }
-      char x=*(glyph_ptr)-'R';
-      char y=*(glyph_ptr+1)-'R';
+      int8_t x=*(glyph_ptr)-'R';
+      int8_t y=*(glyph_ptr+1)-'R';
 
       if (x==-50 && y==0) /*Pen-Up*/
       {
