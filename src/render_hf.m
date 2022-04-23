@@ -1,4 +1,4 @@
-## Copyright (C) 2013 Andreas Weber <andy.weber.aw@gmail.com>
+## Copyright (C) 2013-2022 Andreas Weber <andy.weber.aw@gmail.com>
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -21,10 +21,14 @@
 ## @seealso{plot_hf}
 ## @end deftypefn
 
-function render_hf (fn, outdir="./")
-  [DIR, NAME, EXT, VER] = fileparts (fn);
-  fn_png = fullfile(strcat(outdir,"_png"),strcat(NAME,".png"));
-  fn_svg = fullfile(strcat(outdir,"_svg"),strcat(NAME,".svg"));
+function render_hf (fn, png_out = "./rendered_png", svg_out = "./rendered_svg")
+  [DIR, NAME, EXT] = fileparts (fn);
+
+  mkdir (png_out);
+  mkdir (svg_out);
+
+  fn_png = fullfile(png_out, [NAME ".png"]);
+  fn_svg = fullfile(svg_out, [NAME,".svg"]);
   printf("Rendering %s and %s from %s...\n",fn_png,fn_svg,fn);
   fflush(stdout);
 

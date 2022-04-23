@@ -1,6 +1,9 @@
 .PHONY:clean
 .PHONY:realclean
 
+# keep intermediate files (for example "fixed")
+.SECONDARY:
+
 fixed_hf = $(subst orig,fixed,$(wildcard orig/*.jhf))
 rendered_hf_png = $(patsubst %.jhf,%.png,$(subst orig,rendered_png,$(wildcard orig/*.jhf)))
 rendered_hf_svg = $(patsubst %.jhf,%.svg,$(subst orig,rendered_svg,$(wildcard orig/*.jhf)))
@@ -19,9 +22,7 @@ fixed/%.jhf: orig/%.jhf ./fix_linebreak.sh
 	./fix_linebreak.sh $< $@
 
 rendered_png/%.png rendered_svg/%.svg: fixed/%.jhf $(RENDER_DEP)
-	@mkdir -p rendered_png
-	@mkdir -p rendered_svg
-	octave -q --eval 'addpath("../src/"); render_hf("$<","rendered")'
+	octave -q --eval 'addpath("../src/"); render_hf("$<", "rendered_png", "rendered_svg")'
 
 png_album: $(rendered_hf_png)
 	photon -J -s 0 -t 800x800 -E -d 1 -l40 -o png_album rendered_png
