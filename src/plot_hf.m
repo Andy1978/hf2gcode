@@ -14,11 +14,11 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function File} {} plot_hf (@var{hf}, @var{cols}=10, @var{xsep}=30, @var{ysep}=50)
+## @deftypefn  {Function File} {} plot_hf (@var{hf}, @var{cols}=15, @var{xsep}=30, @var{ysep}=50)
 ## Plots a hershey font (all glyphs)
 ## @end deftypefn
 
-function plot_hf(hf,cols=10, xsep=30, ysep=50)
+function plot_hf(hf, cols=15, xsep=30, ysep=50)
   for (i=1:length(hf))
     col = mod (i-1,cols);
     row = floor ((i-1)/cols);
@@ -26,4 +26,5 @@ function plot_hf(hf,cols=10, xsep=30, ysep=50)
     hold on
   endfor
   hold off
+  axis equal
 endfunction
