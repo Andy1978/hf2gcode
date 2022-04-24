@@ -1,5 +1,5 @@
 /*
-  Copyright(C) 2014 Andreas Weber <andy.weber.aw@gmail.com>
+  Copyright(C) 2014-2022 Andreas Weber <andy.weber.aw@gmail.com>
 
   This file is part of hf2gcode.
 
@@ -50,12 +50,20 @@
   #include "../hershey_fonts/gen_c_src/timesr.h"
 #endif
 
+/*for ASCII fonts, will not work with e.g. japanese*/
 #define FONT_TABLE(x) if (!strcmp(font, #x)) \
   { cnt   = x##_cnt; \
-    ptr   = x;     \
-    index = c-32;} /*for ASCII fonts, will not work with e.g. japanese*/
+    ptr   = x; \
+    switch (c) { /* mapping of WINDOWS-1252 ÄÖÜäöü */\
+      case 0xC4: index =  96; break; /* Ä */\
+      case 0xD6: index =  97; break; /* Ö */\
+      case 0xDC: index =  98; break; /* Ü */\
+      case 0xE4: index =  99; break; /* ä */\
+      case 0xF6: index = 100; break; /* ö */\
+      case 0xFC: index = 101; break; /* ü */\
+    default: index = c - 32;}}
 
-const char *argp_program_version = "hf2gcode 0.2.2";
+const char *argp_program_version = "hf2gcode 0.3.0";
 
 #include <stdlib.h>
 #include <stdio.h>

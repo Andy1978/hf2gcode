@@ -3,10 +3,13 @@ hf2gcode, a hershey font to g-code tracer
 ![demo_hello_world.ngc in LinuxCNC](http://tech-chat.de/images/demo_hello_world.png)
 (The image above shows src/demo_hello_word.ngc in LinuxCNCs simulator with sim/axis/axis_mm.ini)
 
-The current release is "hf2gcode 0.2.1",
+The current release is "hf2gcode 0.3.0",
 please see topic "Bugs" or "TODO" below before you report a bug.
 
-Available fonts in "hf2gcode 0.2.1":
+German "Umlaute" ÄÖÜäöü are only implementes in font rowmans (hf2gcode default) yet.
+![Demo with German Umlaut, rendered with ncviewer.com](demo_Umlaute.png?raw=true)
+
+Available fonts in "hf2gcode 0.3.0":
 [cursive](http://www.tech-chat.de/hf/cursive.svg),
 [futural](http://www.tech-chat.de/hf/futural.svg),
 [futuram](http://www.tech-chat.de/hf/futuram.svg),
@@ -143,8 +146,6 @@ TODO / not yet implemented features
 *  Multiline align-right or align-center ist not yet implemented, please use the default "align-left" instead.
 
 *  Don't lift the pen if the start position of the next glyph is the same as the end position of the current. For example see a text which uses font "scripts".
-
-*  German "Umlaute" äöüß weren't implemented yet.
 
 Bugs
 ----

@@ -1,2 +1,2 @@
 Hello world!
-This is hf2gcode 0.2
+This is hf2gcode 0.3.0

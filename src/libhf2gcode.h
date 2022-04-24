@@ -1,5 +1,5 @@
 /*
-  Copyright(C) 2014 Andreas Weber <andy.weber.aw@gmail.com>
+  Copyright(C) 2014-2022 Andreas Weber <andy.weber.aw@gmail.com>
 
   This file is part of hf2gcode.
 

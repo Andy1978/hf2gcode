@@ -1,5 +1,5 @@
 /*
-  Copyright(C) 2014 Andreas Weber <andy.weber.aw@gmail.com>
+  Copyright(C) 2014-2022 Andreas Weber <andy.weber.aw@gmail.com>
 
   This file is part of hf2gcode.
 
@@ -323,6 +323,26 @@ main (int argc, char **argv)
       fprintf(stderr ,"ERROR: I'm sorry but align-center isn't implemented yet. Please use align-left instead\n");
       exit(EXIT_FAILURE);
     }
+
+  // UTF-8 to WINDOWS-1252 for chars ÄÖÜäöü
+  {
+    int len = strlen (arguments.text);
+    int p = 0;
+    for (int i = 0; i < len; ++i)
+    {
+      //printf ("i = %i\n", i);
+      unsigned char c = arguments.text[i];
+      if (c == 0xC3 && i < (len - 1))
+        {
+          //printf ("DEBUG: char at %i looks like an UTF-8 char...\n", i);
+          // UTF-8 -> WINDOWS-1252
+          c = arguments.text[++i] + 0x40;
+          //printf ("char %i = 0x%02x", i, c);
+        }
+      arguments.text[p++] = c;
+    }
+    arguments.text[p] = 0;
+  }
 
   int init_ret = init_get_gcode_line (arguments.font,
                                       arguments.text,
