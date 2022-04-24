@@ -20,7 +20,7 @@ all: src $(rendered_hf_png) $(rendered_hf_svg)
 fixed/%.jhf: orig/%.jhf ./fix_linebreak.sh
 	@mkdir -p fixed
 	./fix_linebreak.sh $< $@
-	find ./umlaut -name "$(basename $(notdir $@)).patch" -exec sh -c "patch -p1 < {}" \;
+	find ./patches -name "$(basename $(notdir $@))_*.patch" -exec sh -c "patch -p1 < {}" \;
 
 rendered_png/%.png rendered_svg/%.svg: fixed/%.jhf $(RENDER_DEP)
 	octave -q --eval 'addpath("../src/"); render_hf("$<", "rendered_png", "rendered_svg")'

@@ -1,7 +1,7 @@
 /* This file was generated with gen_C_code.m from fixed/rowmans.jhf */
 
 /* number of glyphs in font */
-unsigned char rowmans_cnt = 96;
+unsigned char rowmans_cnt = 102;
 
 /* Format: margin left, margin right, X, Y ... \0
 < R> is pen-up, see original hershey font */
@@ -101,5 +101,11 @@ const char rowmans [] PROGMEM="JZ\0"\
           "KYPBRCSDTFTHSJRKQMQOSQ RRCSESGRIQJPLPNQPURQTPVPXQZR[S]S_Ra RSSQUQWRYSZT\\T^S`RaPb\0"\
           "F^IUISJPLONOPPTSVTXTZS[Q RISJQLPNPPQTTVUXUZT[Q[O\0"\
           "KYQFOGNINKOMQNSNUMVKVIUGSFQF\0"\
+          "I[RFJ[ RRFZ[ RMTWT RNDOEPDOCND RTDUEVDUCTD\0"\
+          "G]PFNGLIKKJNJSKVLXNZP[T[VZXXYVZSZNYKXIVGTFPF RNDOEPDOCND RTDUEVDUCTD\0"\
+          "G]KFKULXNZQ[S[VZXXYUYF RNDOEPDOCND RTDUEVDUCTD\0"\
+          "I\\XMX[ RXPVNTMQMONMPLSLUMXOZQ[T[VZXX ROJPKQJPIOJ RTJUKVJUITJ\0"\
+          "I\\QMONMPLSLUMXOZQ[T[VZXXYUYSXPVNTMQM ROJPKQJPIOJ RTJUKVJUITJ\0"\
+          "I\\MMMWNZP[S[UZXW RXMX[ ROJPKQJPIOJ RTJUKVJUITJ\0"\
 ;
 /* End of file gen_c_src/rowmans.h */
