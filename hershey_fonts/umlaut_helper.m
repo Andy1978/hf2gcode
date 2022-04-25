@@ -1,5 +1,6 @@
 addpath ("../src");
-fn = "fixed_b/futural.jhf";
+fn = "fixed/futural.jhf";
+#fn = "fixed/rowmans.jhf";
 
 x = load_hf (fn);
 
@@ -11,24 +12,24 @@ if (numel (x) == 96)
   new_lines = tmp([34, 48, 54, 66, 80, 86]);
 
   # dot on the i
-  i_dot = strsplit (tmp{74}){2}(4:end);
+  i_dot = strsplit (strtrim (tmp{74})){2}(4:end);
 
   for i = 1:numel (new_lines)
     # add the dot twice with default shift
     # this is a rough assumption which needs to be fine tuned below
     if (i <= 3)
-      new_lines{i} = strcat (new_lines{i}, " R", hf_shift (i_dot, -3, -2));
-      new_lines{i} = strcat (new_lines{i}, " R", hf_shift (i_dot,  3, -2));
+      new_lines{i} = strcat (new_lines{i}, " R", hf_shift (i_dot, -3, -3));
+      new_lines{i} = strcat (new_lines{i}, " R", hf_shift (i_dot,  3, -3));
     else
-      new_lines{i} = strcat (new_lines{i}, " R", hf_shift (i_dot, -2,  4));
-      new_lines{i} = strcat (new_lines{i}, " R", hf_shift (i_dot,  3,  4));
+      new_lines{i} = strcat (new_lines{i}, " R", hf_shift (i_dot, -2,  0));
+      new_lines{i} = strcat (new_lines{i}, " R", hf_shift (i_dot,  3,  0));
     endif
   endfor
 
   # fix glyphlen
   add_len = (numel(i_dot) / 2 + 1) * 2;
   for i = 1:numel (new_lines)
-    [S, E, ~, old_len_str] = regexp (new_lines{i}, "(?<= )[0-9]+", "once");
+    [S, E, ~, old_len_str] = regexp (new_lines{i}, "(?<= )[0-9]+(?=[A-Z])", "once");
     old_len = str2double (old_len_str);
     new_len = old_len + add_len;
     tmp = strcat (new_lines{i}(1:S-1), sprintf(" %2i",new_len), new_lines{i}(E+1:end));
@@ -65,4 +66,4 @@ if (0)
   x(102) = tr (x(102), -2, 4, 3, 4);  #ü
 endif
 
-plot_hf (x(97:end))
+plot_hf (x([74,97:102]))

@@ -1,7 +1,7 @@
 /* This file was generated with gen_C_code.m from fixed/futural.jhf */
 
 /* number of glyphs in font */
-unsigned char futural_cnt = 96;
+unsigned char futural_cnt = 102;
 
 /* Format: margin left, margin right, X, Y ... \0
 < R> is pen-up, see original hershey font */
@@ -101,5 +101,11 @@ const char futural [] PROGMEM="JZ\0"\
           "KYPBRCSDTFTHSJRKQMQOSQ RRCSESGRIQJPLPNQPURQTPVPXQZR[S]S_Ra RSSQUQWRYSZT\\T^S`RaPb\0"\
           "F^IUISJPLONOPPTSVTXTZS[Q RISJQLPNPPQTTVUXUZT[Q[O\0"\
           "JZJFJ[K[KFLFL[M[MFNFN[O[OFPFP[Q[QFRFR[S[SFTFT[U[UFVFV[W[WFXFX[Y[YFZFZ[\0"\
+          "I[RFJ[ RRFZ[ RMTWT RNCODPCOBNC RTCUDVCUBTC\0"\
+          "G]PFNGLIKKJNJSKVLXNZP[T[VZXXYVZSZNYKXIVGTFPF RNCODPCOBNC RTCUDVCUBTC\0"\
+          "G]KFKULXNZQ[S[VZXXYUYF RNCODPCOBNC RTCUDVCUBTC\0"\
+          "I\\XMX[ RXPVNTMQMONMPLSLUMXOZQ[T[VZXX ROFPGQFPEOF RTFUGVFUETF\0"\
+          "I\\QMONMPLSLUMXOZQ[T[VZXXYUYSXPVNTMQM ROFPGQFPEOF RTFUGVFUETF\0"\
+          "I\\MMMWNZP[S[UZXW RXMX[ ROFPGQFPEOF RTFUGVFUETF\0"\
 ;
 /* End of file gen_c_src/futural.h */
