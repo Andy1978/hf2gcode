@@ -29,7 +29,7 @@ function ret = load_hf (fn)
       ret(cnt).len = str2num (s(6:8));
       ## check length
       if (ret(cnt).len != (length(s)-8)/2)
-        error ("actual length of glyph doesn't match. Perhaps a corrupted file? Check linebreaks in glyph and CR/LF issues.")
+        error ("actual length of glyph doesn't match in line %i. Perhaps a corrupted file? Check linebreaks in glyph and CR/LF issues.", cnt)
       endif
       ret(cnt).leftmargin  = s(9)-'R';
       ret(cnt).rightmargin = s(10)-'R';

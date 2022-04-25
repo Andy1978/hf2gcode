@@ -1,6 +1,51 @@
-
 addpath ("../src");
-x = load_hf ("fixed/rowmans.jhf")
+fn = "fixed_b/futural.jhf";
+
+x = load_hf (fn);
+
+if (numel (x) == 96)
+  # ÄÖÜäöü not jetz added
+  tmp = strsplit (fileread (fn), "\n");
+
+  # copy AOUaou
+  new_lines = tmp([34, 48, 54, 66, 80, 86]);
+
+  # dot on the i
+  i_dot = strsplit (tmp{74}){2}(4:end);
+
+  for i = 1:numel (new_lines)
+    # add the dot twice with default shift
+    # this is a rough assumption which needs to be fine tuned below
+    if (i <= 3)
+      new_lines{i} = strcat (new_lines{i}, " R", hf_shift (i_dot, -3, -2));
+      new_lines{i} = strcat (new_lines{i}, " R", hf_shift (i_dot,  3, -2));
+    else
+      new_lines{i} = strcat (new_lines{i}, " R", hf_shift (i_dot, -2,  4));
+      new_lines{i} = strcat (new_lines{i}, " R", hf_shift (i_dot,  3,  4));
+    endif
+  endfor
+
+  # fix glyphlen
+  add_len = (numel(i_dot) / 2 + 1) * 2;
+  for i = 1:numel (new_lines)
+    [S, E, ~, old_len_str] = regexp (new_lines{i}, "(?<= )[0-9]+", "once");
+    old_len = str2double (old_len_str);
+    new_len = old_len + add_len;
+    tmp = strcat (new_lines{i}(1:S-1), sprintf(" %2i",new_len), new_lines{i}(E+1:end));
+    new_lines{i} = tmp;
+  endfor
+
+  # Attention: append 6 new lines to original file
+  fid = fopen (fn, "a");
+  for i = 1:numel (new_lines)
+    # debugging out
+    disp (new_lines{i});
+    fdisp (fid, new_lines{i});
+  endfor
+  fclose (fid);
+
+endif
+
 #plot_hf (x(2:4))
 
 function glyph = tr (glyph, x1, y1, x2, y2)
@@ -21,14 +66,3 @@ if (0)
 endif
 
 plot_hf (x(97:end))
-
-
-# Basis/Ausgangspunkt war das i Pünktchen: QFRGSFREQF
-
-# ÄÖÜ
-hf_shift ("QFRGSFREQF", -3, -2)
-hf_shift ("QFRGSFREQF",  3, -2)
-
-# äöü
-hf_shift ("QFRGSFREQF", -2, 4)
-hf_shift ("QFRGSFREQF",  3, 4)
