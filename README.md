@@ -40,8 +40,7 @@ Dependencies
 ------------
 *  gcc, the GNU Compiler Collection, libc
 *  [GNU argp](http://www.gnu.org/software/libc/manual/html_node/Argp.html)
-*  (OPTIONAL) GNU Octave if you want to generate the hershey font overview pngs and svgs or to generated the hershey_font C declarations.
-*  (OPTIONAL) photon if you want to generate a static HTML page with rendered fonts like http://www.tech-chat.de/png_album/
+*  (OPTIONAL) GNU Octave if you want to generate the hershey font overview svgs or to generated the hershey_font C declarations.
 
 Build
 -----
@@ -109,7 +108,7 @@ Design and structure
 --------------------
 *  hershey_fonts/orig/*.jhf: original hershey fonts, see hershey_fonts/README
 *  hershey_fonts/fixed/*.jhf: generated with fix_linebreak.sh from orig
-*  OPTIONAL hershey_fonts/rendered_png and rendered_svg: All fonts as PNG or SVG, generated from src/render_hf (see http://www.tech-chat.de/png_album/)
+*  OPTIONAL hershey_fonts/rendered_svg: All fonts as SVG, generated from src/render_hf (see http://www.tech-chat.de/png_album/)
 *  hershey_fonts/gen_c_src/*.h: Font declarations, generated with src/gen_C_code.m
 *  src/libhf2gcode.c and .h: Actual type setting/tracing
 *  src/hf2gcode.c: A command line interface program to call libhf2gcode

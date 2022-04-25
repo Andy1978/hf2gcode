@@ -15,27 +15,19 @@
 
 ## -*- texinfo -*-
 ## @deftypefn  {Function File} {} render_hf (@var{fn}, @var{outdir})
-## Render hershey font using octave, export it to PNG and SVG image.
+## Render hershey font using octave and export it as SVG.
 ## Its purpose is to get an overview over the available glyphs.
-## Attention: outdir works only once, (not like mkdir -p).
 ## @seealso{plot_hf}
 ## @end deftypefn
 
-function render_hf (fn, png_out = "./rendered_png", svg_out = "./rendered_svg")
+function render_hf (fn, svg_out = "./rendered_svg")
   [DIR, NAME, EXT] = fileparts (fn);
-
-  mkdir (png_out);
   mkdir (svg_out);
-
-  fn_png = fullfile(png_out, [NAME ".png"]);
   fn_svg = fullfile(svg_out, [NAME,".svg"]);
-  printf("Rendering %s and %s from %s...\n",fn_png,fn_svg,fn);
+  printf("Rendering %s from %s...\n", fn_svg, fn);
   fflush(stdout);
-
   hf = load_hf (fn);
   figure("visible","off");
-  plot_hf(hf), axis square
-
-  print(fn_png,"-S1200,1200")
-  print(fn_svg,"-S1200,1200")
+  plot_hf(hf)
+  print (fn_svg)
 endfunction

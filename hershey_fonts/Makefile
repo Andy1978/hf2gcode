@@ -5,7 +5,6 @@
 .SECONDARY:
 
 fixed_hf = $(subst orig,fixed,$(wildcard orig/*.jhf))
-rendered_hf_png = $(patsubst %.jhf,%.png,$(subst orig,rendered_png,$(wildcard orig/*.jhf)))
 rendered_hf_svg = $(patsubst %.jhf,%.svg,$(subst orig,rendered_svg,$(wildcard orig/*.jhf)))
 gen_c = $(patsubst %.jhf,%.h,$(subst orig,gen_c_src,$(wildcard orig/*.jhf)))
 
@@ -22,11 +21,8 @@ fixed/%.jhf: orig/%.jhf ./fix_linebreak.sh
 	./fix_linebreak.sh $< $@
 	find ./patches -name "$(basename $(notdir $@))_*.patch" -exec sh -c "patch -p1 < {}" \;
 
-rendered_png/%.png rendered_svg/%.svg: fixed/%.jhf $(RENDER_DEP)
+rendered_svg/%.svg: fixed/%.jhf $(RENDER_DEP)
 	octave -q --eval 'addpath("../src/"); render_hf("$<", "rendered_png", "rendered_svg")'
-
-png_album: $(rendered_hf_png)
-	photon -J -s 0 -t 800x800 -E -d 1 -l40 -o png_album rendered_png
 
 gen_c_src/%.h:fixed/%.jhf ../src/gen_C_code.m ../src/load_hf.m
 	@mkdir -p gen_c_src
